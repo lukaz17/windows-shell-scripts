@@ -104,14 +104,15 @@ if (Test-Path "${ACTIVE_TARGET}") {
 New-Item -ItemType Junction -Target "${INSTALL_TARGET}" -Path "${ACTIVE_TARGET}"
 
 # Update PATH for quick access
+$ACTIVE_TARGET_BIN = [IO.Path]::Combine("${ACTIVE_TARGET}")
 $CLIINST_PATH = ${env:CLIINST_PATH}
 if (${CLIINST_PATH} -eq $null) {
-	$CLIINST_PATH = "${ACTIVE_TARGET}"
+	$CLIINST_PATH = "${ACTIVE_TARGET_BIN}"
 }
 else {
 	$CLIINST_PATHS = ${CLIINST_PATH}.Split(";")
-	if (${CLIINST_PATHS}.IndexOf("${ACTIVE_TARGET}") -eq -1) {
-		$CLIINST_PATH = "${CLIINST_PATH};${ACTIVE_TARGET}"
+	if (${CLIINST_PATHS}.IndexOf("${ACTIVE_TARGET_BIN}") -eq -1) {
+		$CLIINST_PATH = "${CLIINST_PATH};${ACTIVE_TARGET_BIN}"
 		$CLIINST_PATHS = ${CLIINST_PATH}.Split(";")
 	}
 	$CLIINST_PATHS = ${CLIINST_PATHS} | Sort-Object -Unique
@@ -123,5 +124,7 @@ if (${IS_ADMIN}) {
 else {
 	[Environment]::SetEnvironmentVariable("CLIINST_PATH", "${CLIINST_PATH}", "User")
 }
+Write-Output "Installation completed"
+Write-Output "New terminal session must be started before installing other applications using this script to avoid lost ENVAR issue"
 
 Set-PSDebug -Trace 0
