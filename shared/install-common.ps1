@@ -86,6 +86,28 @@ function Link-Item2 {
 	New-Item -ItemType "${Type}" -Target "${From}" -Path "${To}"
 }
 
+# ------------------------------------------------------------------------------
+# Download from URI
+# ------------------------------------------------------------------------------
+function Download-Uri {
+	param(
+		[Parameter(Mandatory)] [string] $Uri,
+		[Parameter(Mandatory)] [string] $OutFile
+	)
+	$curl = Get-Command "curl.exe" -ErrorAction SilentlyContinue
+	if ($curl -and $($curl.Source) -ne "") {
+		& "$($curl.Source)" -fSL "${Uri}" -o "${OutFile}"
+		if (${LASTEXITCODE} -ne 0) {
+			Write-Output "curl failed with exit code ${LASTEXITCODE}"
+			exit 1
+		}
+		return
+	}
+
+	$ProgressPreference = "SilentlyContinue"
+	Invoke-WebRequest -Uri "${Uri}" -OutFile "${OutFile}"
+	$ProgressPreference = "Continue"
+}
 
 # ------------------------------------------------------------------------------
 # Normalize install version for consistency
@@ -192,26 +214,23 @@ function Download-UriPerArch {
 	}
 
 	$arch = ${env:PROCESSOR_ARCHITECTURE}
-	$ProgressPreference = "SilentlyContinue"
 	if ("${arch}" -eq "AMD64") {
 		if ("${Amd64Uri}" -eq "") {
 			Write-Output "Download-UriPerArch: Unsupported architecture: ${arch}"
 			exit 1
 		}
-		Invoke-WebRequest -Uri "${Amd64Uri}" -OutFile "${OutputPath}"
+		Download-Uri -Uri "${Amd64Uri}" -OutFile "${OutputPath}"
 	} elseif ("${arch}" -eq "ARM64") {
 		if ("${Arm64Uri}" -eq "") {
 			Write-Output "Download-UriPerArch: Unsupported architecture: ${arch}"
 			exit 1
 		}
-		Invoke-WebRequest -Uri "${Arm64Uri}" -OutFile "${OutputPath}"
+		Download-Uri -Uri "${Arm64Uri}" -OutFile "${OutputPath}"
 	} else {
 		Write-Output "Download-UriPerArch: Unsupported architecture: ${arch}"
 		exit 1
 	}
-	$ProgressPreference = "Continue"
 }
-
 
 # ------------------------------------------------------------------------------
 # Move file/folder based on current system architecture
@@ -246,7 +265,6 @@ function Move-ItemPerArch {
 		exit 1
 	}
 }
-
 
 # ------------------------------------------------------------------------------
 # Extract archive
