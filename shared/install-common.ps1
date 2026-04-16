@@ -294,6 +294,8 @@ function Extract-Archive {
 # Appends a bin path to the CLIINST_PATH environment variable, deduplicates
 # and sorts the entries, then persists the value at Machine scope (system-wide)
 # or User scope (per-user).
+# Uses a temp file (CLIINST_PATH_MACHINE.txt or CLIINST_PATH_USER.txt) as an
+# intermediary cache to read/write the path list.
 # ------------------------------------------------------------------------------
 function Update-CliinstPath {
 	param(
@@ -301,8 +303,20 @@ function Update-CliinstPath {
 		[Parameter()] [bool] $IsSystemWide = $false
 	)
 
-	$cliinstPath = ${env:CLIINST_PATH}
-	if ($null -eq ${cliinstPath}) {
+	$fileName = if (${IsSystemWide}) { "CLIINST_PATH_MACHINE.txt" } else { "CLIINST_PATH_USER.txt" }
+	$filePath = [IO.Path]::Combine(${env:TEMP}, ${fileName})
+	if (-not (Test-Path ${filePath})) {
+		$envValue = ${env:CLIINST_PATH}
+		if ($null -ne ${envValue}) {
+			Set-Content -Path ${filePath} -Value ${envValue} -Encoding UTF8
+		}
+	}
+
+	$cliinstPath = if (Test-Path ${filePath}) { Get-Content -Path ${filePath} -Raw } else { $null }
+	if ($null -ne ${cliinstPath}) {
+		$cliinstPath = $cliinstPath.Trim()
+	}
+	if ($null -eq ${cliinstPath} -or ${cliinstPath} -eq "") {
 		$cliinstPath = ${BinPath}
 	} else {
 		$paths = ${cliinstPath}.Split(";")
@@ -316,6 +330,7 @@ function Update-CliinstPath {
 
 	$scope = if (${IsSystemWide}) { "Machine" } else { "User" }
 	[Environment]::SetEnvironmentVariable("CLIINST_PATH", ${cliinstPath}, ${scope})
+	Set-Content -Path "${filePath}" -Value "${cliinstPath}" -Encoding UTF8
 }
 
 # ------------------------------------------------------------------------------
