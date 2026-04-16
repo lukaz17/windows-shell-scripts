@@ -56,7 +56,5 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 # Finalize install
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
 Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
-Write-Output "Installation completed"
-Write-Output "New terminal session must be started before installing other applications using this script to avoid lost ENVAR issue"
 
 Set-PSDebug -Trace 0
