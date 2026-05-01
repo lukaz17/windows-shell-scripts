@@ -168,11 +168,11 @@ function Initialize-InstallEnv {
 	}
 	$tempRoot = ${env:TEMP}
 
-	if (${env:CLIINST_USR_LOCAL_SHARE} -ne "") {
+	if ("${env:CLIINST_USR_LOCAL_SHARE}" -ne "") {
 		$installRoot = [IO.Path]::Combine(${env:CLIINST_USR_LOCAL_SHARE}, ${ProgramId})
 	}
-	if (${env:CLIINST_TEMP} -ne "") {
-		$tempRoot = ${env:CLIINST_TEMP}
+	if ("${env:CLIINST_TEMP}" -ne "") {
+		$tempRoot = "${env:CLIINST_TEMP}"
 	}
 
 	$installTarget = [IO.Path]::Combine(${installRoot}, "${ProgramId}-v${Version}")
