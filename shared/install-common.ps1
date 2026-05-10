@@ -105,7 +105,7 @@ function Download-Uri {
 	}
 
 	$ProgressPreference = "SilentlyContinue"
-	Invoke-WebRequest -Uri "${Uri}" -OutFile "${OutFile}"
+	Invoke-WebRequest -UseBasicParsing -Uri "${Uri}" -OutFile "${OutFile}"
 	$ProgressPreference = "Continue"
 }
 
@@ -136,7 +136,7 @@ function Get-InstallVersionFromGithub {
 	)
 
 	if ("${FallbackVersion}" -eq "") {
-		$version = (Invoke-WebRequest "https://api.github.com/repos/${Owner}/${Repo}/releases/latest" | ConvertFrom-Json).tag_name
+		$version = (Invoke-WebRequest -UseBasicParsing "https://api.github.com/repos/${Owner}/${Repo}/releases/latest" | ConvertFrom-Json).tag_name
 	} else {
 		$version = ${FallbackVersion}
 	}
