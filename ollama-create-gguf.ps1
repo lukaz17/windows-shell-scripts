@@ -7,13 +7,15 @@
 #  The script won't handle input validations and delegate it to Ollama.
 #
 #  Usage:
-#    ollama-create-gguf <model:tag> -Src <path> [-ContextSize <KB>] [-Verify <0/1>]
+#    ollama-create-gguf -Model <model:tag> -Src <path> [-ContextSize <KB>] [-KVCache <fp16/f16/q8_0/q4_0>] [-Verify <0/1>]
 #
 #  Example:
+#    ollama-create-gguf llama-3.3-nemotron-super:49b-it-q4_K_M .\Llama-3_3-Nemotron-Super-49B-v1_5-Q4_K_M.gguf
 #    ollama-create-gguf llama-3.3-nemotron-super:49b-it-q4_K_M .\Llama-3_3-Nemotron-Super-49B-v1_5-Q4_K_M.gguf 128
-#    ollama-create-gguf llama-3.3-nemotron-super:49b-it-q4_K_M .\Llama-3_3-Nemotron-Super-49B-v1_5-Q4_K_M.gguf 128 1
-#    ollama-create-gguf llama-3.3-nemotron-super:49b-it-q4_K_M -Src .\Llama-3_3-Nemotron-Super-49B-v1_5-Q4_K_M.gguf -ContextSize 128
-#    ollama-create-gguf llama-3.3-nemotron-super:49b-it-q4_K_M -Src .\Llama-3_3-Nemotron-Super-49B-v1_5-Q4_K_M.gguf -ContextSize 128 -Verify 1
+#    ollama-create-gguf llama-3.3-nemotron-super:49b-it-q4_K_M .\Llama-3_3-Nemotron-Super-49B-v1_5-Q4_K_M.gguf 128 q8_0
+#    ollama-create-gguf llama-3.3-nemotron-super:49b-it-q4_K_M .\Llama-3_3-Nemotron-Super-49B-v1_5-Q4_K_M.gguf 128 q8_0 1
+#    ollama-create-gguf llama-3.3-nemotron-super:49b-it-q4_K_M .\Llama-3_3-Nemotron-Super-49B-v1_5-Q4_K_M.gguf -ContextSize 128 -KVCache q8_0 -Verify 1
+#    ollama-create-gguf -Model llama-3.3-nemotron-super:49b-it-q4_K_M -Src .\Llama-3_3-Nemotron-Super-49B-v1_5-Q4_K_M.gguf -ContextSize 128 -KVCache q8_0 -Verify 1
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -33,18 +35,24 @@ param(
     [int]$ContextSize,
 
 	[Parameter(Mandatory = $false)]
+	[string]$KVCache,
+
+	[Parameter(Mandatory = $false)]
 	[int]$Verify = $false
 )
 
 $NEW_MODEL = "${Model}"
 $MODEL_GGUF = "${Src}"
+$KV_CACHE = "${KVCache}"
 $LOAD_N_VERIFY = $(${Verify} -ne 0)
 
-# Create temporary Modelfile
 $mfFile = [IO.Path]::Combine(${env:TEMP}, "ollama_$([System.IO.Path]::GetRandomFileName()).Modelfile")
 $mfContent = "FROM ${MODEL_GGUF}"
 if ($PSBoundParameters.ContainsKey('ContextSize')) {
 	$mfContent += "`nPARAMETER num_ctx $(${ContextSize} * 1024)"
+}
+if ($PSBoundParameters.ContainsKey('KVCache')) {
+	$mfContent += "`nPARAMETER kv_cache ${KV_CACHE}"
 }
 Set-Content -Path ${mfFile} -Value ${mfContent} -Encoding UTF8
 

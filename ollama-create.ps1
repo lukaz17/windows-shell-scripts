@@ -7,13 +7,15 @@
 #  The script won't handle input validations and delegate it to Ollama.
 #
 #  Usage:
-#    ollama-create <model:tag> [-ContextSize <KB>] [-BaseModel <model:tag>] [-Verify <0/1>]
+#    ollama-create -Model <model:tag> [-ContextSize <KB>] [-BaseModel <model:tag>] [-KVCache <fp16/f16/q8_0/q4_0>] [-Verify <0/1>]
 #
 #  Example:
+#    ollama-create mistral-small-3.2:24b-it-q4_K_M 128
 #    ollama-create mistral-small-3.2:24b-it-q4_K_M 128 mistral-small3.2:24b-instruct-2506-q4_K_M
-#    ollama-create mistral-small-3.2:24b-it-q4_K_M 128 mistral-small3.2:24b-instruct-2506-q4_K_M 1
-#    ollama-create mistral-small-3.2:24b-it-q4_K_M -ContextSize 128 -BaseModel mistral-small3.2:24b-instruct-2506-q4_K_M
-#    ollama-create mistral-small-3.2:24b-it-q4_K_M -ContextSize 128 -BaseModel mistral-small3.2:24b-instruct-2506-q4_K_M -Verify 1
+#    ollama-create mistral-small-3.2:24b-it-q4_K_M 128 mistral-small3.2:24b-instruct-2506-q4_K_M q8_0
+#    ollama-create mistral-small-3.2:24b-it-q4_K_M 128 mistral-small3.2:24b-instruct-2506-q4_K_M q8_0 1
+#    ollama-create mistral-small-3.2:24b-it-q4_K_M -ContextSize 128 -BaseModel mistral-small3.2:24b-instruct-2506-q4_K_M -KVCache q8_0 -Verify 1
+#    ollama-create -Model mistral-small-3.2:24b-it-q4_K_M -ContextSize 128 -BaseModel mistral-small3.2:24b-instruct-2506-q4_K_M -KVCache q8_0 -Verify 1
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -32,6 +34,9 @@ param(
 	[string]$BaseModel,
 
 	[Parameter(Mandatory = $false)]
+	[string]$KVCache,
+
+	[Parameter(Mandatory = $false)]
 	[int]$Verify = $false
 )
 
@@ -40,13 +45,16 @@ $BASE_MODEL = "${BaseModel}"
 if ("${BASE_MODEL}" -eq "") {
 	$BASE_MODEL = "${Model}"
 }
+$KV_CACHE = "${KVCache}"
 $LOAD_N_VERIFY = $(${Verify} -ne 0)
 
-# Create temporary Modelfile
 $mfFile = [IO.Path]::Combine(${env:TEMP}, "ollama_$([System.IO.Path]::GetRandomFileName()).Modelfile")
 $mfContent = "FROM ${BASE_MODEL}"
 if ($PSBoundParameters.ContainsKey('ContextSize')) {
 	$mfContent += "`nPARAMETER num_ctx $(${ContextSize} * 1024)"
+}
+if ($PSBoundParameters.ContainsKey('KVCache')) {
+	$mfContent += "`nPARAMETER kv_cache ${KV_CACHE}"
 }
 Set-Content -Path ${mfFile} -Value ${mfContent} -Encoding UTF8
 
