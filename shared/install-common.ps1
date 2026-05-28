@@ -291,6 +291,20 @@ function Extract-Archive {
 }
 
 # ------------------------------------------------------------------------------
+# Set environment variable
+# ------------------------------------------------------------------------------
+function Set-EnvVariable {
+	param(
+		[Parameter(Mandatory)] [string] $Name,
+		[Parameter(Mandatory)] [string] $Value,
+		[Parameter()] [bool] $IsSystemWide = $false
+	)
+
+	$scope = if (${IsSystemWide}) { "Machine" } else { "User" }
+	[Environment]::SetEnvironmentVariable("${Name}", "${Value}", ${scope})
+}
+
+# ------------------------------------------------------------------------------
 # Appends a bin path to the CLIINST_PATH environment variable, deduplicates
 # and sorts the entries, then persists the value at Machine scope (system-wide)
 # or User scope (per-user).
@@ -328,8 +342,7 @@ function Update-CliinstPath {
 		$cliinstPath = $cliinstPath.Trim(";")
 	}
 
-	$scope = if (${IsSystemWide}) { "Machine" } else { "User" }
-	[Environment]::SetEnvironmentVariable("CLIINST_PATH", ${cliinstPath}, ${scope})
+	Set-EnvVariable "CLIINST_PATH" ${cliinstPath} ${IsSystemWide}
 	Set-Content -Path "${filePath}" -Value "${cliinstPath}" -Encoding UTF8
 }
 
