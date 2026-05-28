@@ -151,6 +151,7 @@ function Initialize-InstallEnv {
 	param(
 		[Parameter(Mandatory)] [string] $ProgramId,
 		[Parameter(Mandatory)] [string] $Version,
+		[string] $ActiveTag,
 		[switch] $IsApplication
 	)
 
@@ -176,7 +177,8 @@ function Initialize-InstallEnv {
 	}
 
 	$installTarget = [IO.Path]::Combine(${installRoot}, "${ProgramId}-v${Version}")
-	$activeTarget  = [IO.Path]::Combine(${installRoot}, "active-release")
+	$activeSuffix = if ("${ActiveTag}" -ne "") { "-${ActiveTag}" } else { "" }
+	$activeTarget  = [IO.Path]::Combine(${installRoot}, "active-release${activeSuffix}")
 	$tempTarget  = [IO.Path]::Combine(${tempRoot}, "${ProgramId}-v${Version}")
 
 	New-Directory2 "${installRoot}"
