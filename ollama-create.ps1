@@ -7,15 +7,13 @@
 #  The script won't handle input validations and delegate it to Ollama.
 #
 #  Usage:
-#    ollama-create -Model <model:tag> [-ContextSize <KB>] [-BaseModel <model:tag>] [-KVCache <fp16/f16/q8_0/q4_0>] [-Verify <0/1>]
+#    ollama-create -Model <model:tag> [-ContextSize <KB>] [-RepeatPenalty <float>] [-Temperature <float>] [-TopK <int>] [-TopP <float>] [-MinP <float>] [-BaseModel <model:tag>] [-KVCache <fp16/f16/q8_0/q4_0>] [-Verify <0/1>]
 #
 #  Example:
-#    ollama-create mistral-small-3.2:24b-it-q4_K_M 128
-#    ollama-create mistral-small-3.2:24b-it-q4_K_M 128 mistral-small3.2:24b-instruct-2506-q4_K_M
-#    ollama-create mistral-small-3.2:24b-it-q4_K_M 128 mistral-small3.2:24b-instruct-2506-q4_K_M q8_0
-#    ollama-create mistral-small-3.2:24b-it-q4_K_M 128 mistral-small3.2:24b-instruct-2506-q4_K_M q8_0 1
-#    ollama-create mistral-small-3.2:24b-it-q4_K_M -ContextSize 128 -BaseModel mistral-small3.2:24b-instruct-2506-q4_K_M -KVCache q8_0 -Verify 1
-#    ollama-create -Model mistral-small-3.2:24b-it-q4_K_M -ContextSize 128 -BaseModel mistral-small3.2:24b-instruct-2506-q4_K_M -KVCache q8_0 -Verify 1
+#    ollama-create qwen3.6:27b-q8_0 -ContextSize 256
+#    ollama-create qwen3.6:27b-q8_0 qwen3.6:27b-q8_0 256
+#    ollama-create qwen3.6:27b-q8_0 -ContextSize 256 -Verify 1
+#    ollama-create -Model qwen3.6:27b-q8_0 -ContextSize 256 -Temperature 0.7 -TopK 40 -TopP 0.9 -MinP 0.05 -RepeatPenalty 1.1
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -28,10 +26,25 @@ param(
 	[string]$Model,
 
 	[Parameter(Mandatory = $false)]
+	[string]$BaseModel,
+
+	[Parameter(Mandatory = $false)]
 	[int]$ContextSize,
 
 	[Parameter(Mandatory = $false)]
-	[string]$BaseModel,
+	[float]$RepeatPenalty,
+
+	[Parameter(Mandatory = $false)]
+	[float]$Temperature,
+
+	[Parameter(Mandatory = $false)]
+	[int]$TopK,
+
+	[Parameter(Mandatory = $false)]
+	[float]$TopP,
+
+	[Parameter(Mandatory = $false)]
+	[float]$MinP,
 
 	[Parameter(Mandatory = $false)]
 	[string]$KVCache,
@@ -45,13 +58,34 @@ $BASE_MODEL = "${BaseModel}"
 if ("${BASE_MODEL}" -eq "") {
 	$BASE_MODEL = "${Model}"
 }
+$CONTEXT_LENGTH_KB = ${ContextSize}
+$REPEAT_PENALTY = ${RepeatPenalty}
+$TEMPERATURE = ${Temperature}
+$TOP_K = ${TopK}
+$TOP_P = ${TopP}
+$MIN_P = ${MinP}
 $KV_CACHE = "${KVCache}"
 $LOAD_N_VERIFY = $(${Verify} -ne 0)
 
 $mfFile = [IO.Path]::Combine(${env:TEMP}, "ollama_$([System.IO.Path]::GetRandomFileName()).Modelfile")
 $mfContent = "FROM ${BASE_MODEL}"
 if ($PSBoundParameters.ContainsKey('ContextSize')) {
-	$mfContent += "`nPARAMETER num_ctx $(${ContextSize} * 1024)"
+	$mfContent += "`nPARAMETER num_ctx $(${CONTEXT_LENGTH_KB} * 1024)"
+}
+if ($PSBoundParameters.ContainsKey('RepeatPenalty')) {
+	$mfContent += "`nPARAMETER repeat_penalty ${REPEAT_PENALTY}"
+}
+if ($PSBoundParameters.ContainsKey('Temperature')) {
+	$mfContent += "`nPARAMETER temperature ${TEMPERATURE}"
+}
+if ($PSBoundParameters.ContainsKey('TopK')) {
+	$mfContent += "`nPARAMETER top_k ${TOP_K}"
+}
+if ($PSBoundParameters.ContainsKey('TopP')) {
+	$mfContent += "`nPARAMETER top_p ${TOP_P}"
+}
+if ($PSBoundParameters.ContainsKey('MinP')) {
+	$mfContent += "`nPARAMETER min_p ${MIN_P}"
 }
 if ($PSBoundParameters.ContainsKey('KVCache')) {
 	$mfContent += "`nPARAMETER kv_cache ${KV_CACHE}"
