@@ -27,6 +27,28 @@ if (${args}.Count -ge 1) {
 	$OLLAMA_HOST = ${args}[0].ToString()
 }
 
+function Get-ParameterFromResponse($showResponse, $paramName) {
+	if ($showResponse.PSObject.Properties['parameters']) {
+		foreach ($line in $($showResponse.parameters) -split "`n") {
+			if (${line}.Trim() -match "^${paramName}\s+(.+)") {
+				return [int]${matches}[1]
+			}
+		}
+	}
+	return $null
+}
+
+function Get-ModelInfoFromResponse($showResponse, $keyPattern) {
+	if ($showResponse.PSObject.Properties['model_info']) {
+		foreach ($key in $($showResponse.model_info.PSObject.Properties.Name)) {
+			if (${key} -match $keyPattern) {
+				return $($showResponse.model_info.${key})
+			}
+		}
+	}
+	return $null
+}
+
 $tagsResponse = Invoke-RestMethod -Uri "${OLLAMA_HOST}/api/tags" -Method Get
 $models = $($tagsResponse.models)
 
@@ -38,43 +60,10 @@ foreach ($model in $models) {
 	$showBody = @{ model = $modelName } | ConvertTo-Json -Compress
 	$showResponse = Invoke-RestMethod -Body ${showBody} -ContentType "application/json" -Method Post -Uri "${OLLAMA_HOST}/api/show"
 
-	$numCtx = $null
-	if ($($showResponse.parameters)) {
-		foreach ($line in $($showResponse.parameters) -split "`n") {
-			if (${line}.Trim() -match "^num_ctx\s+(.+)") {
-				$numCtx = [int]${matches}[1]
-				break
-			}
-		}
-	}
-
-	$architecture = $null
-	if ($($showResponse.model_info)) {
-		foreach ($key in $($showResponse.model_info.PSObject.Properties.Name)) {
-			if (${key} -match "general.architecture") {
-				$architecture = $($showResponse.model_info.${key})
-				break
-			}
-		}
-	}
-	$parameter_count = $null
-	if ($($showResponse.model_info)) {
-		foreach ($key in $($showResponse.model_info.PSObject.Properties.Name)) {
-			if (${key} -match "general.parameter_count") {
-				$parameter_count = $($showResponse.model_info.${key})
-				break
-			}
-		}
-	}
-	$contextLength = $null
-	if ($($showResponse.model_info)) {
-		foreach ($key in $($showResponse.model_info.PSObject.Properties.Name)) {
-			if (${key} -match "$($showResponse.details.family).context_length") {
-				$contextLength = $($showResponse.model_info.${key})
-				break
-			}
-		}
-	}
+	$numCtx = Get-ParameterFromResponse $showResponse "num_ctx"
+	$architecture = Get-ModelInfoFromResponse $showResponse "general.architecture"
+	$parameter_count = Get-ModelInfoFromResponse $showResponse "general.parameter_count"
+	$contextLength = Get-ModelInfoFromResponse $showResponse "$($showResponse.details.family).context_length"
 
 	$info = [PSCustomObject]@{
 		name            = $modelName
