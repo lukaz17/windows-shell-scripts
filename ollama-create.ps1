@@ -50,7 +50,10 @@ param(
 	[string]$KVCache,
 
 	[Parameter(Mandatory = $false)]
-	[int]$Verify = $false
+	[int]$Verify = $false,
+
+	[Parameter(Mandatory = $false)]
+	[string]$HostUrl
 )
 
 $NEW_MODEL = "${Model}"
@@ -66,6 +69,14 @@ $TOP_P = ${TopP}
 $MIN_P = ${MinP}
 $KV_CACHE = "${KVCache}"
 $LOAD_N_VERIFY = $(${Verify} -ne 0)
+
+$OLLAMA_HOST = "http://127.0.0.1:11434"
+if ("${env:OLLAMA_HOST}" -ne "") {
+	$OLLAMA_HOST = "${env:OLLAMA_HOST}"
+}
+if ($HostUrl) {
+	$OLLAMA_HOST = $HostUrl
+}
 
 $mfFile = [IO.Path]::Combine(${env:TEMP}, "ollama_$([System.IO.Path]::GetRandomFileName()).Modelfile")
 $mfContent = "FROM ${BASE_MODEL}"
@@ -99,41 +110,8 @@ try {
 		throw "ollama create failed with exit code $LASTEXITCODE"
 	}
 
-	if (${LOAD_N_VERIFY}) {
-		Write-Host "> Load model into memory."
-		$loadBody = @{
-			model      = $Model
-			messages   = @()
-			keep_alive = 60
-		} | ConvertTo-Json
-
-		try {
-			Invoke-RestMethod -Uri "http://127.0.0.1:11434/api/chat"-Method Post -Body ${loadBody} -ContentType "application/json" | Out-Null
-		} catch {
-			throw "Failed to load model into memory: $_"
-		}
-
-		Write-Host "> Query model details."
-		try {
-			$psResponse = Invoke-RestMethod `
-				-Uri    "http://127.0.0.1:11434/api/ps" `
-				-Method Get
-		} catch {
-			throw "Failed to query /api/ps: $_"
-		}
-
-		$first = $psResponse.models | Select-Object -First 1
-		if ($null -eq $first) {
-			throw "Model not found in /api/ps"
-		}
-
-		Write-Host "Name               : $($first.name)"
-		Write-Host "Parameter Size     : $($first.details.parameter_size)"
-		Write-Host "Quantization Level : $($first.details.quantization_level)"
-		Write-Host "Family             : $($first.details.family)"
-		Write-Host "Context Size       : $($first.context_length)"
-		Write-Host "Memory             : $($first.size)"
-		Write-Host "> Success."
+	if ($LOAD_N_VERIFY) {
+		& "$PSScriptRoot\ollama-info.ps1" -Model $Model -HostUrl $OLLAMA_HOST
 	} else {
 		Write-Host "> Success."
 		Start-Sleep -Seconds 1

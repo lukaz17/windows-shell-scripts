@@ -35,7 +35,10 @@ param(
     [int]$ContextSize,
 
 	[Parameter(Mandatory = $false)]
-	[int]$Verify = $false
+	[int]$Verify = $false,
+
+	[Parameter(Mandatory = $false)]
+	[string]$HostUrl
 )
 
 $NEW_MODEL = "${Model}"
@@ -62,11 +65,12 @@ try {
 	Remove-Item -Path ${mfFile} -ErrorAction SilentlyContinue
 }
 
-$params = @{
+$ollamaCreateParams = @{
 	Model = $Model
 }
-if ($PSBoundParameters.ContainsKey('ContextSize')) { $params['ContextSize'] = $ContextSize }
-if ($PSBoundParameters.ContainsKey('KVCache'))     { $params['KVCache']     = $KVCache }
-if ($PSBoundParameters.ContainsKey('Verify'))      { $params['Verify']      = $Verify }
+if ($PSBoundParameters.ContainsKey('ContextSize')) { $ollamaCreateParams['ContextSize'] = $ContextSize }
+if ($PSBoundParameters.ContainsKey('KVCache'))     { $ollamaCreateParams['KVCache']     = $KVCache }
+if ($PSBoundParameters.ContainsKey('Verify'))      { $ollamaCreateParams['Verify']      = $Verify }
+if ($PSBoundParameters.ContainsKey('HostUrl'))     { $ollamaCreateParams['HostUrl']     = $HostUrl }
 
-& "$PSScriptRoot\ollama-create.ps1" @params
+& "$PSScriptRoot\ollama-create.ps1" @ollamaCreateParams
