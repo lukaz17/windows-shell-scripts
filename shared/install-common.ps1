@@ -307,6 +307,46 @@ function Set-EnvVariable {
 }
 
 # ------------------------------------------------------------------------------
+# Remove environment variable
+# ------------------------------------------------------------------------------
+function Remove-EnvVariable {
+	param(
+		[Parameter(Mandatory)] [string] $Name,
+		[Parameter()] [bool] $IsSystemWide = $false
+	)
+
+	$scope = if (${IsSystemWide}) { "Machine" } else { "User" }
+	[Environment]::SetEnvironmentVariable("${Name}", $null, ${scope})
+}
+
+# ------------------------------------------------------------------------------
+# Prepend CLIINST_PATH to the system PATH environment variable.
+# ------------------------------------------------------------------------------
+function Install-CliinstPath {
+	param(
+		[Parameter()] [bool] $IsSystemWide = $false
+	)
+
+	$scope = if (${IsSystemWide}) { "Machine" } else { "User" }
+	$currentPath = [Environment]::GetEnvironmentVariable("PATH", ${scope})
+
+	if ($null -eq ${currentPath} -or ${currentPath} -eq "") {
+		$currentPath = ""
+	}
+
+	$envTag = "%CLIINST_PATH%"
+	$entries = ${currentPath}.Split(";")
+	foreach ($entry in ${entries}) {
+		if (${entry}.Trim().ToLower() -eq ${envTag}.ToLower()) {
+			return
+		}
+	}
+
+	$newPath = "${envTag};${currentPath}"
+	[Environment]::SetEnvironmentVariable("PATH", ${newPath}, ${scope})
+}
+
+# ------------------------------------------------------------------------------
 # Appends a bin path to the CLIINST_PATH environment variable, deduplicates
 # and sorts the entries, then persists the value at Machine scope (system-wide)
 # or User scope (per-user).
@@ -320,7 +360,8 @@ function Update-CliinstPath {
 	)
 
 	$fileName = if (${IsSystemWide}) { "CLIINST_PATH_MACHINE.txt" } else { "CLIINST_PATH_USER.txt" }
-	$filePath = [IO.Path]::Combine(${env:TEMP}, ${fileName})
+	$tempDir = if ("${env:CLIINST_TEMP}" -ne "") { "${env:CLIINST_TEMP}" } else { ${env:TEMP} }
+	$filePath = [IO.Path]::Combine(${tempDir}, ${fileName})
 	if (-not (Test-Path ${filePath})) {
 		$envValue = ${env:CLIINST_PATH}
 		if ($null -ne ${envValue}) {
