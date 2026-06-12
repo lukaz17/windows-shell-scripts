@@ -39,18 +39,19 @@ Set-PSDebug -Trace 2
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 if (${PSBoundParameters}.ContainsKey("UsrLocalShare")) {
 	if (${UsrLocalShare} -eq "") {
-		Remove-EnvVariable "CLIINST_USR_LOCAL_SHARE" ${isAdmin}
+		Remove-EnvVariable "CLIINST_USR_LOCAL_SHARE" -IsSystemWide ${isAdmin}
 	} else {
-		Set-EnvVariable "CLIINST_USR_LOCAL_SHARE" "${UsrLocalShare}" ${isAdmin}
+		Set-EnvVariable "CLIINST_USR_LOCAL_SHARE" "${UsrLocalShare}" -IsSystemWide ${isAdmin}
 	}
 }
 if (${PSBoundParameters}.ContainsKey("Tmp")) {
 	if (${Tmp} -eq "") {
-		Remove-EnvVariable "CLIINST_TEMP" ${isAdmin}
+		Remove-EnvVariable "CLIINST_TEMP" -IsSystemWide ${isAdmin}
 	} else {
-		Set-EnvVariable "CLIINST_TEMP" "${Tmp}" ${isAdmin}
+		Set-EnvVariable "CLIINST_TEMP" "${Tmp}" -IsSystemWide ${isAdmin}
 	}
 }
-Install-CliinstPath ${isAdmin}
+Install-CliinstPath -IsSystemWide ${isAdmin}
+Update-CliinstPath -BinPath "${PSScriptRoot}" -IsSystemWide ${isAdmin}
 
 Set-PSDebug -Trace 0
