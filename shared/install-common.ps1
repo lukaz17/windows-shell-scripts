@@ -8,6 +8,8 @@
 #
 ################################################################################
 
+Set-PSDebug -Trace 0
+
 # ------------------------------------------------------------------------------
 # Create a directory safely
 # ------------------------------------------------------------------------------
@@ -17,6 +19,7 @@ function New-Directory2 {
 	)
 
 	if (!(Test-Path "${Path}" -PathType Container)) {
+		Write-Host "> Create Dir:   ${Path}"
 		New-Item -ItemType Directory -Path "${Path}" -Force | Out-Null
 	}
 }
@@ -30,6 +33,7 @@ function Remove-Item2 {
 	)
 
 	if (Test-Path "${Path}") {
+		Write-Host "> Remove Item:  ${Path}"
 		Remove-Item "${Path}" -Recurse -Force
 	}
 }
@@ -48,6 +52,7 @@ function Copy-Item2 {
 		Remove-Item2 "${To}"
 	}
 
+	Write-Host "> Copy Item:    ${From} -> ${To}"
 	Copy-Item -Path "${From}" -Destination "${To}" -Recurse
 }
 
@@ -65,6 +70,7 @@ function Move-Item2 {
 		Remove-Item2 "${To}"
 	}
 
+	Write-Host "> Move Item:    ${From} -> ${To}"
 	Move-Item -Path "${From}" -Destination "${To}"
 }
 
@@ -83,7 +89,9 @@ function Link-Item2 {
 		Remove-Item2 "${To}"
 	}
 
+	Write-Host "> Link Item:    ${From} -> ${To}"
 	New-Item -ItemType "${Type}" -Target "${From}" -Path "${To}"
+	Write-Host ""
 }
 
 # ------------------------------------------------------------------------------
@@ -96,6 +104,7 @@ function Download-Uri {
 	)
 	$curl = Get-Command "curl.exe" -ErrorAction SilentlyContinue
 	if ($curl -and $($curl.Source) -ne "") {
+		Write-Host "> Download Uri: ${Uri} -> ${OutFile}"
 		& "$($curl.Source)" -fSL "${Uri}" -o "${OutFile}"
 		if (${LASTEXITCODE} -ne 0) {
 			Write-Output "curl failed with exit code ${LASTEXITCODE}"
@@ -105,6 +114,7 @@ function Download-Uri {
 	}
 
 	$ProgressPreference = "SilentlyContinue"
+	Write-Host "> Request Uri:  ${Uri} -> ${OutFile}"
 	Invoke-WebRequest -UseBasicParsing -Uri "${Uri}" -OutFile "${OutFile}"
 	$ProgressPreference = "Continue"
 }
@@ -141,6 +151,7 @@ function Get-InstallVersionFromGithub {
 		$version = ${FallbackVersion}
 	}
 
+	Write-Host "> Latest Version:  ${version}"
 	return Normalize-InstallVersion "${version}"
 }
 
@@ -157,6 +168,7 @@ function Initialize-InstallEnv {
 
 	$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 	$arch = ${env:PROCESSOR_ARCHITECTURE}
+	Write-Host "> Init InstEnv: ${ProgramId} v${Version} ${arch}"
 
 	if (${isAdmin}) {
 		$installRoot = [IO.Path]::Combine(${env:PROGRAMFILES}, ${ProgramId})
@@ -289,6 +301,7 @@ function Extract-Archive {
 	}
 
 	New-Directory2 "${DestinationPath}"
+	Write-Host "> Exract Arch:  ${ArchivePath} -> v${DestinationPath}"
 	& "${7zCli}" x "${ArchivePath}" "-o${DestinationPath}" | Out-Null
 }
 
@@ -303,6 +316,7 @@ function Set-EnvVariable {
 	)
 
 	$scope = if (${IsSystemWide}) { "Machine" } else { "User" }
+	Write-Host "> Set EnvVar: ${Name}"
 	[Environment]::SetEnvironmentVariable("${Name}", "${Value}", ${scope})
 }
 
@@ -316,6 +330,7 @@ function Remove-EnvVariable {
 	)
 
 	$scope = if (${IsSystemWide}) { "Machine" } else { "User" }
+	Write-Host "> Rem EnvVar: ${Name}"
 	[Environment]::SetEnvironmentVariable("${Name}", $null, ${scope})
 }
 
@@ -359,6 +374,7 @@ function Update-CliinstPath {
 		[Parameter()] [bool] $IsSystemWide = $false
 	)
 
+	Write-Host "> Add Path:     ${BinPath}"
 	$fileName = if (${IsSystemWide}) { "CLIINST_PATH_MACHINE.txt" } else { "CLIINST_PATH_USER.txt" }
 	$tempDir = if ("${env:CLIINST_TEMP}" -ne "") { "${env:CLIINST_TEMP}" } else { ${env:TEMP} }
 	$filePath = [IO.Path]::Combine(${tempDir}, ${fileName})
@@ -402,6 +418,7 @@ function New-AppShortcut {
 
 	$shortcutPath = [IO.Path]::Combine(${Destination}, "${ProgramName}.lnk")
 	Remove-Item2 "${shortcutPath}"
+	Write-Host "> New Shortcut: ${TargetExe} -> ${shortcutPath}"
 	$wshShell = New-Object -ComObject WScript.Shell
 	$shortcut = ${wshShell}.CreateShortcut($shortcutPath)
 	${shortcut}.TargetPath = ${TargetExe}
