@@ -32,9 +32,6 @@ param(
 	[int]$ContextSize,
 
 	[Parameter(Mandatory = $false)]
-	[float]$RepeatPenalty,
-
-	[Parameter(Mandatory = $false)]
 	[float]$Temperature,
 
 	[Parameter(Mandatory = $false)]
@@ -42,6 +39,9 @@ param(
 
 	[Parameter(Mandatory = $false)]
 	[float]$TopP,
+
+	[Parameter(Mandatory = $false)]
+	[float]$RepeatPenalty,
 
 	[Parameter(Mandatory = $false)]
 	[float]$MinP,
@@ -62,10 +62,10 @@ if ("${BASE_MODEL}" -eq "") {
 	$BASE_MODEL = "${Model}"
 }
 $CONTEXT_LENGTH_KB = ${ContextSize}
-$REPEAT_PENALTY = ${RepeatPenalty}
 $TEMPERATURE = ${Temperature}
 $TOP_K = ${TopK}
 $TOP_P = ${TopP}
+$REPEAT_PENALTY = ${RepeatPenalty}
 $MIN_P = ${MinP}
 $KV_CACHE = "${KVCache}"
 $LOAD_N_VERIFY = $(${Verify} -ne 0)
@@ -83,9 +83,6 @@ $mfContent = "FROM ${BASE_MODEL}"
 if ($PSBoundParameters.ContainsKey('ContextSize')) {
 	$mfContent += "`nPARAMETER num_ctx $(${CONTEXT_LENGTH_KB} * 1024)"
 }
-if ($PSBoundParameters.ContainsKey('RepeatPenalty')) {
-	$mfContent += "`nPARAMETER repeat_penalty ${REPEAT_PENALTY}"
-}
 if ($PSBoundParameters.ContainsKey('Temperature')) {
 	$mfContent += "`nPARAMETER temperature ${TEMPERATURE}"
 }
@@ -94,6 +91,9 @@ if ($PSBoundParameters.ContainsKey('TopK')) {
 }
 if ($PSBoundParameters.ContainsKey('TopP')) {
 	$mfContent += "`nPARAMETER top_p ${TOP_P}"
+}
+if ($PSBoundParameters.ContainsKey('RepeatPenalty')) {
+	$mfContent += "`nPARAMETER repeat_penalty ${REPEAT_PENALTY}"
 }
 if ($PSBoundParameters.ContainsKey('MinP')) {
 	$mfContent += "`nPARAMETER min_p ${MIN_P}"
