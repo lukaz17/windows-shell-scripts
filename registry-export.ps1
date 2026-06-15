@@ -51,12 +51,13 @@ function Get-RegPSPath {
 # ------------------------------------------------------------------------------
 function Get-RegValueType($kind) {
 	switch (${kind}) {
-		'String'       { 'String' }
-		'ExpandString' { 'ExpandString' }
 		'Binary'       { 'Binary' }
 		'DWord'        { 'DWord' }
+		'ExpandString' { 'ExpandString' }
 		'MultiString'  { 'MultiString' }
+		'None'         { 'None' }
 		'QWord'        { 'QWord' }
+		'String'       { 'String' }
 		default        { 'Unknown' }
 	}
 }
@@ -64,30 +65,37 @@ function Get-RegValueType($kind) {
 # ------------------------------------------------------------------------------
 # Get registry value data in PowerShell format
 # ------------------------------------------------------------------------------
-function Get-RegValueData($raw, $kind) {
+function Get-RegValueData($data, $kind) {
 	switch (${kind}) {
-		'DWord' {
-			'0x{0:X8}' -f [int32]${raw}
-		}
-		'QWord' {
-			'0x{0:X16}' -f [int64]${raw}
-		}
 		'Binary' {
-			if (${raw}.Length -eq 0) {
-				'[byte[]] @()'
+			if (${data}.Length -eq 0) {
+				'([byte[]] @())'
 			} else {
-				'[byte[]] @(' + ((${raw} | ForEach-Object { '0x{0:X2}' -f $_ }) -join ', ') + ')'
+				'([byte[]] @(' + ((${data} | ForEach-Object { '0x{0:X2}' -f $_ }) -join ', ') + '))'
+			}
+		}
+		'DWord' {
+			'0x{0:X8}' -f [int32]${data}
+		}
+		'None' {
+			if ($null -eq ${data} -or ${data}.Length -eq 0) {
+				'([byte[]] @())'
+			} else {
+				'([byte[]] @(' + ((${data} | ForEach-Object { '0x{0:X2}' -f $_ }) -join ', ') + '))'
 			}
 		}
 		'MultiString' {
-			if (${raw}.Length -eq 0) {
-				'[string[]] @()'
+			if (${data}.Length -eq 0) {
+				'([string[]] @())'
 			} else {
-				'[string[]] @(' + ((${raw} | ForEach-Object { '"' + ($_ -replace '"', '`"') + '"' }) -join ', ') + ')'
+				'([string[]] @(' + ((${data} | ForEach-Object { '"' + ($_ -replace '"', '`"') + '"' }) -join ', ') + '))'
 			}
 		}
+		'QWord' {
+			'0x{0:X16}' -f [int64]${data}
+		}
 		default {
-			'"' + (${raw} -replace '(["`$])', '`$1') + '"'
+			'"' + (${data} -replace '(["`$])', '`$1') + '"'
 		}
 	}
 }
@@ -185,7 +193,7 @@ if ($null -eq ${rootKey}) {
 }
 
 $lines = [System.Collections.Generic.List[string]]::new()
-${lines}.Add(@"
+${lines}.Add(@'
 function Create-RegistryKey($path, [switch]$overwrite) {
 	if ($overwrite -and (Test-Path $path)) {
 		Remove-Item -Path $path -Recurse -Force
@@ -194,7 +202,7 @@ function Create-RegistryKey($path, [switch]$overwrite) {
 		New-Item -Path $path -Force | Out-Null
 	}
 }
-"@)
+'@)
 
 $subLines = Export-RegKey ${rootKey}
 for ($i = 0; $i -lt ${subLines}.Count; $i++) {
