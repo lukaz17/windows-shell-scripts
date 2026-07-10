@@ -316,7 +316,7 @@ function Set-EnvVariable {
 	)
 
 	$scope = if (${IsSystemWide}) { "Machine" } else { "User" }
-	Write-Host "> Set EnvVar: ${Name}"
+	Write-Host "> Set EnvVar:   ${Name}"
 	[Environment]::SetEnvironmentVariable("${Name}", "${Value}", ${scope})
 }
 
@@ -330,7 +330,7 @@ function Remove-EnvVariable {
 	)
 
 	$scope = if (${IsSystemWide}) { "Machine" } else { "User" }
-	Write-Host "> Rem EnvVar: ${Name}"
+	Write-Host "> Rem EnvVar:   ${Name}"
 	[Environment]::SetEnvironmentVariable("${Name}", $null, ${scope})
 }
 
@@ -424,4 +424,11 @@ function New-AppShortcut {
 	${shortcut}.TargetPath = ${TargetExe}
 	${shortcut}.WorkingDirectory = ${WorkingDir}
 	${shortcut}.Save()
+}
+
+# ------------------------------------------------------------------------------
+# Finalize install.
+# ------------------------------------------------------------------------------
+function Finalize-Install {
+	Write-Host "> Success."
 }
