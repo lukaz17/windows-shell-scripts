@@ -28,6 +28,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://downloads.getmaxim.ai/bifrost/v${version}/windows/amd64/bifrost-http.exe" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"Circom" = @{
+		GithubOwner      = "iden3"
+		GithubRepo       = "circom"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/iden3/circom/releases/download/v${version}/circom-windows-amd64.exe" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"CPU-Z" = @{
 		GithubOwner      = ""
 		GithubRepo       = ""
