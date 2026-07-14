@@ -168,6 +168,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/microsoft/terminal/releases/download/v${version}/Microsoft.WindowsTerminal_${version}_x64.zip" }
 		Arm64Uri         = { param($version) "https://github.com/microsoft/terminal/releases/download/v${version}/Microsoft.WindowsTerminal_${version}_arm64.zip" }
 	}
+	"ytdlp" = @{
+		GithubOwner      = "yt-dlp"
+		GithubRepo       = "yt-dlp"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/yt-dlp/yt-dlp/releases/download/${version}/yt-dlp.exe" }
+		Arm64Uri         = { param($version) "https://github.com/yt-dlp/yt-dlp/releases/download/${version}/yt-dlp_arm64.exe" }
+	}
 }
 
 $Script:ProgramUriTable = @{
