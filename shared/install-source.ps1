@@ -28,6 +28,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://downloads.getmaxim.ai/bifrost/v${version}/windows/amd64/bifrost-http.exe" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"Bun" = @{
+		GithubOwner      = "oven-sh"
+		GithubRepo       = "bun"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/oven-sh/bun/releases/download/bun-v${version}/bun-windows-x64.zip" }
+		Arm64Uri         = { param($version) "https://github.com/oven-sh/bun/releases/download/bun-v${version}/bun-windows-aarch64.zip" }
+	}
 	"Circom" = @{
 		GithubOwner      = "iden3"
 		GithubRepo       = "circom"
