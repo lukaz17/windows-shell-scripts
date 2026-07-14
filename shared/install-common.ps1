@@ -124,12 +124,17 @@ function Download-Uri {
 # ------------------------------------------------------------------------------
 function Normalize-InstallVersion {
 	param(
-		[Parameter()] [string] $Version = ""
+		[Parameter()] [string] $Version = "",
+		[Parameter()] [string] $TagPrefix = ""
 	)
 
 	if ("${Version}" -eq "") {
 		Write-Output "Normalize-InstallVersion: Install version is not specified"
 		exit 1
+	}
+
+	if ("${TagPrefix}" -ne "" -and ${Version}.StartsWith(${TagPrefix})) {
+		$Version = ${Version}.Substring(${TagPrefix}.Length)
 	}
 
 	return ${Version}.TrimStart("v")
@@ -142,6 +147,7 @@ function Get-InstallVersionFromGithub {
 	param(
 		[Parameter(Mandatory)] [string] $Owner,
 		[Parameter(Mandatory)] [string] $Repo,
+		[string] $TagPrefix = "",
 		[string] $FallbackVersion = ""
 	)
 
@@ -152,7 +158,7 @@ function Get-InstallVersionFromGithub {
 	}
 
 	Write-Host "> Latest Version:  ${version}"
-	return Normalize-InstallVersion "${version}"
+	return Normalize-InstallVersion "${version}" -TagPrefix "${TagPrefix}"
 }
 
 # ------------------------------------------------------------------------------
