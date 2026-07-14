@@ -20,7 +20,6 @@
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
-Set-PSDebug -Trace 2
 
 # Application info
 $PROGRAM_ID = "CPU-Z"
@@ -29,6 +28,7 @@ $PROGRAM_EXEC = "cpuz_x64.exe"
 
 # Shared library
 . "${PSScriptRoot}\shared\install-common.ps1"
+. "${PSScriptRoot}\shared\install-source.ps1"
 
 # Prepare environment
 $INSTALL_VERSION = ""
@@ -40,8 +40,8 @@ $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTA
 
 # Download and install binaries
 if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
-	$BIN_ARCH_URI_AMD64 = "https://download.cpuid.com/cpu-z/cpu-z_${INSTALL_VERSION}-en.zip"
-	$BIN_ARCH_URI_ARM64 = ""
+	$BIN_ARCH_URI_AMD64 = Get-Amd64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
+	$BIN_ARCH_URI_ARM64 = Get-Arm64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
 	$BIN_ARCH_TMP_FILE = "$($InstallEnv.TempTarget).zip"
 	Download-UriPerArch -Amd64Uri "${BIN_ARCH_URI_AMD64}" -Arm64Uri "${BIN_ARCH_URI_ARM64}" -OutputPath "${BIN_ARCH_TMP_FILE}"
 	New-Directory2 "$($InstallEnv.TempTarget)"
@@ -56,5 +56,4 @@ Copy-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)
 $TARGET_EXE=[IO.Path]::Combine($($InstallEnv.ActiveTarget), ${PROGRAM_EXEC})
 New-AppShortcut -ProgramName "${PROGRAM_NAME}" -TargetExe "${TARGET_EXE}" -WorkingDir "$($InstallEnv.ActiveTarget)" -Destination "$($InstallEnv.DesktopRoot)"
 New-AppShortcut -ProgramName "${PROGRAM_NAME}" -TargetExe "${TARGET_EXE}" -WorkingDir "$($InstallEnv.ActiveTarget)" -Destination "$($InstallEnv.StartMenuRoot)"
-
-Set-PSDebug -Trace 0
+Finalize-Install
