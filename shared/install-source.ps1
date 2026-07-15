@@ -147,6 +147,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/sass/dart-sass/releases/download/${version}/dart-sass-${version}-windows-x64.zip" }
 		Arm64Uri         = { param($version) "https://github.com/sass/dart-sass/releases/download/${version}/dart-sass-${version}-windows-arm64.zip" }
 	}
+	"ShareX" = @{
+		GithubOwner      = "ShareX"
+		GithubRepo       = "ShareX"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/ShareX/ShareX/releases/download/v${version}/ShareX-${version}-portable-x64.zip" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"Tabby" = @{
 		GithubOwner      = "Eugeny"
 		GithubRepo       = "tabby"
