@@ -63,6 +63,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/foundry-rs/foundry/releases/download/v${version}/foundry_v${version}_win32_amd64.zip" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"Gitea" = @{
+		GithubOwner      = "go-gitea"
+		GithubRepo       = "gitea"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/go-gitea/gitea/releases/download/v${version}/gitea-${version}-windows-4.0-amd64.exe.xz" }
+		Arm64Uri         = { param($version) "https://github.com/go-gitea/gitea/releases/download/v${version}/gitea-${version}-windows-4.0-arm64.exe.xz" }
+	}
 	"Go" = @{
 		GithubOwner      = ""
 		GithubRepo       = ""
