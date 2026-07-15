@@ -98,6 +98,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://ftp.mozilla.org/pub/firefox/releases/${version}/win64/en-US/Firefox%20Setup%20${version}.exe" }
 		Arm64Uri         = { param($version) "https://ftp.mozilla.org/pub/firefox/releases/${version}/win64-aarch64/en-US/Firefox%20Setup%20${version}.exe" }
 	}
+	"Mozilla Thunderbird" = @{
+		GithubOwner      = "thunderbird"
+		GithubRepo       = "thunderbird-desktop"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://ftp.mozilla.org/pub/thunderbird/releases/${version}/win64/en-US/Thunderbird%20Setup%20${version}.exe" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"Ollama" = @{
 		GithubOwner      = "ollama"
 		GithubRepo       = "ollama"
