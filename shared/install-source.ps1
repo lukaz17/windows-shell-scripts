@@ -91,6 +91,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/Kilo-Org/kilocode/releases/download/v${version}/kilo-windows-x64.zip" }
 		Arm64Uri         = { param($version) "https://github.com/Kilo-Org/kilocode/releases/download/v${version}/kilo-windows-arm64.zip" }
 	}
+	"Mozilla Firefox" = @{
+		GithubOwner      = "mozilla-firefox"
+		GithubRepo       = "firefox"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://ftp.mozilla.org/pub/firefox/releases/${version}/win64/en-US/Firefox%20Setup%20${version}.exe" }
+		Arm64Uri         = { param($version) "https://ftp.mozilla.org/pub/firefox/releases/${version}/win64-aarch64/en-US/Firefox%20Setup%20${version}.exe" }
+	}
 	"Ollama" = @{
 		GithubOwner      = "ollama"
 		GithubRepo       = "ollama"
