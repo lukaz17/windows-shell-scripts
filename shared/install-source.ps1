@@ -77,6 +77,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/gohugoio/hugo/releases/download/v${version}/hugo_extended_withdeploy_${version}_windows-amd64.zip" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"HWMonitor" = @{
+		GithubOwner      = ""
+		GithubRepo       = ""
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://download.cpuid.com/hwmonitor/hwmonitor_${version}.zip" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"Jellyfin" = @{
 		GithubOwner      = ""
 		GithubRepo       = ""
