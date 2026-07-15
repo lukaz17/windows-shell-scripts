@@ -105,6 +105,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://ftp.mozilla.org/pub/thunderbird/releases/${version}/win64/en-US/Thunderbird%20Setup%20${version}.exe" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"Notepad++" = @{
+		GithubOwner      = "notepad-plus-plus"
+		GithubRepo       = "notepad-plus-plus"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v${version}/npp.${version}.portable.x64.7z" }
+		Arm64Uri         = { param($version) "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v${version}/npp.${version}.portable.arm64.zip" }
+	}
 	"Ollama" = @{
 		GithubOwner      = "ollama"
 		GithubRepo       = "ollama"
