@@ -296,19 +296,24 @@ function Extract-Archive {
 		[Parameter(Mandatory)] [string] $ScriptRoot
 	)
 
-	$arch = ${env:PROCESSOR_ARCHITECTURE}
-	if ("${arch}" -eq "AMD64") {
-		$7zCli = [IO.Path]::Combine(${ScriptRoot}, "7z-amd64", "7z.exe")
-	} elseif ("${arch}" -eq "ARM64") {
-		$7zCli = [IO.Path]::Combine(${ScriptRoot}, "7z-arm64", "7z.exe")
+	$7zSys = Get-Command "7z" -ErrorAction SilentlyContinue
+	if ($7zSys) {
+		$7zCli = "$($7zSys.Source)"
 	} else {
-		Write-Output "Unsupported architecture: ${arch}"
-		exit 1
+		$arch = ${env:PROCESSOR_ARCHITECTURE}
+		if ("${arch}" -eq "AMD64") {
+			$7zCli = [IO.Path]::Combine(${ScriptRoot}, "7z-amd64", "7z.exe")
+		} elseif ("${arch}" -eq "ARM64") {
+			$7zCli = [IO.Path]::Combine(${ScriptRoot}, "7z-arm64", "7z.exe")
+		} else {
+			Write-Output "Unsupported architecture: ${arch}"
+			exit 1
+		}
 	}
 
 	New-Directory2 "${DestinationPath}"
-	Write-Host "> Exract Arch:  ${ArchivePath} -> v${DestinationPath}"
-	& "${7zCli}" x "${ArchivePath}" "-o${DestinationPath}" | Out-Null
+	Write-Host "> Exract Arch:  ${ArchivePath} -> ${DestinationPath}"
+	& "${7zCli}" x "${ArchivePath}" "-o${DestinationPath}"
 }
 
 # ------------------------------------------------------------------------------
