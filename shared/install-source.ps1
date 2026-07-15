@@ -77,6 +77,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/gohugoio/hugo/releases/download/v${version}/hugo_extended_withdeploy_${version}_windows-amd64.zip" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"HWiNFO" = @{
+		GithubOwner      = ""
+		GithubRepo       = ""
+		SourceForgeProj  = "hwinfo"
+		Amd64Uri         = { param($version) "https://sourceforge.net/projects/hwinfo/files/Windows_Portable/hwi_$(${version}.Replace('.','')).zip/download" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"HWMonitor" = @{
 		GithubOwner      = ""
 		GithubRepo       = ""
