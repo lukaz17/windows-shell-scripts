@@ -20,16 +20,14 @@
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
-Set-PSDebug -Trace 2
 
 # Application info
-$GITHUB_OWNER = "GyanD"
-$GITHUB_REPO = "codexffmpeg"
 $PROGRAM_ID = "FFmpeg"
 $PROGRAM_EXEC = "ffmpeg.exe"
 
 # Shared library
 . "${PSScriptRoot}\shared\install-common.ps1"
+. "${PSScriptRoot}\shared\install-source.ps1"
 
 # Prepare environment
 $INSTALL_VERSION = ""
@@ -41,8 +39,8 @@ $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTA
 
 # Download and install binaries
 if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
-	$BIN_ARCH_URI_AMD64 = "https://github.com/${GITHUB_OWNER}/${GITHUB_REPO}/releases/download/${INSTALL_VERSION}/ffmpeg-${INSTALL_VERSION}-full_build.7z"
-	$BIN_ARCH_URI_ARM64 = ""
+	$BIN_ARCH_URI_AMD64 = Get-Amd64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
+	$BIN_ARCH_URI_ARM64 = Get-Arm64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
 	$BIN_ARCH_TMP_FILE = "$($InstallEnv.TempTarget).7z"
 	Download-UriPerArch -Amd64Uri "${BIN_ARCH_URI_AMD64}" -Arm64Uri "${BIN_ARCH_URI_ARM64}" -OutputPath "${BIN_ARCH_TMP_FILE}"
 	New-Directory2 "$($InstallEnv.TempTarget)"
@@ -55,6 +53,6 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 
 # Finalize install
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
-Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
-
-Set-PSDebug -Trace 0
+$ACTIVE_TARGET_BIN = $([IO.Path]::Combine("$($InstallEnv.ActiveTarget)", "bin"))
+Update-CliinstPath -BinPath "${ACTIVE_TARGET_BIN}" -IsSystemWide $($InstallEnv.IsAdmin)
+Finalize-Install
