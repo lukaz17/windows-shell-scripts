@@ -49,6 +49,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://download.cpuid.com/cpu-z/cpu-z_${version}-en.zip" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"FanControl" = @{
+		GithubOwner      = "Rem0o"
+		GithubRepo       = "FanControl.Releases"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/Rem0o/FanControl.Releases/releases/download/V${version}/FanControl_${version}_net_10_0.zip" }
+		Arm64Uri         = { param($version) "https://github.com/Rem0o/FanControl.Releases/releases/download/V${version}/FanControl_${version}_net_10_0.zip" }
+	}
 	"FFmpeg" = @{
 		GithubOwner      = "GyanD"
 		GithubRepo       = "codexffmpeg"
