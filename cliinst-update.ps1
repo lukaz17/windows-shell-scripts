@@ -16,8 +16,8 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $gitDir = Join-Path $PSScriptRoot ".git"
-
 if (Test-Path -LiteralPath "${gitDir}" -PathType Container) {
+	Write-Host "> Check for update from git."
 	if (Get-Command git -ErrorAction SilentlyContinue) {
 		try {
 			git -C "${PSScriptRoot}" pull --rebase
