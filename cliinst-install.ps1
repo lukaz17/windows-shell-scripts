@@ -12,7 +12,7 @@
 #
 #  Example:
 #    cliinst-install -UsrLocalShare "C:\Users\user\.local\share" -Tmp "C:\Users\user\AppData\Local\Temp"
-#    cliinst-install -UsrLocalShare ""   # Remove CLIINST_USR_LOCAL_SHARE
+#    cliinst-install -UsrLocalShare "" # Remove CLIINST_USR_LOCAL_SHARE
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -30,7 +30,6 @@ param(
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
-Set-PSDebug -Trace 2
 
 # Shared library
 . "${PSScriptRoot}\shared\install-common.ps1"
@@ -53,5 +52,4 @@ if (${PSBoundParameters}.ContainsKey("Tmp")) {
 }
 Install-CliinstPath -IsSystemWide ${isAdmin}
 Update-CliinstPath -BinPath "${PSScriptRoot}" -IsSystemWide ${isAdmin}
-
-Set-PSDebug -Trace 0
+Finalize-Install
