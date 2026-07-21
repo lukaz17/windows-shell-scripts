@@ -3,7 +3,6 @@
 #  ollama-create
 #
 #  Create a custom model for Ollama from an existing tags in Ollama repository.
-#  If version is not specified, the latest version will be installed.
 #  The script won't handle input validations and delegate it to Ollama.
 #
 #  Usage:
