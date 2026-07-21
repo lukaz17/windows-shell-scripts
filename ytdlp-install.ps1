@@ -24,7 +24,7 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 # Application info
-$PROGRAM_ID = "ytdlp"
+$PROGRAM_ID = "yt-dlp"
 $PROGRAM_EXEC = "yt-dlp.exe"
 
 # Shared library
