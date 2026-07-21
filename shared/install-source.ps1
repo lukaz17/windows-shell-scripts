@@ -196,6 +196,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/Eugeny/tabby/releases/download/v${version}/tabby-${version}-portable-x64.zip" }
 		Arm64Uri         = { param($version) "https://github.com/Eugeny/tabby/releases/download/v${version}/tabby-${version}-portable-arm64.zip" }
 	}
+	"TFunifiler" = @{
+		GithubOwner      = "tforceaio"
+		GithubRepo       = "tf-unifiler"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/tforceaio/tf-unifiler/releases/download/v${version}/unifiler-v${version}-windows-amd64.zip" }
+		Arm64Uri         = { param($version) "https://github.com/tforceaio/tf-unifiler/releases/download/v${version}/unifiler-v${version}-windows-arm64.zip" }
+	}
 	"Unikey" = @{
 		GithubOwner      = ""
 		GithubRepo       = ""
