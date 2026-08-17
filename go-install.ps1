@@ -55,6 +55,8 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
 $ACTIVE_TARGET_BIN = $([IO.Path]::Combine("$($InstallEnv.ActiveTarget)", "bin"))
 Update-CliinstPath -BinPath "${ACTIVE_TARGET_BIN}" -IsSystemWide $($InstallEnv.IsAdmin)
+$ACTIVE_TARGET_TOOL = $([IO.Path]::Combine("$($InstallEnv.ActiveTarget)", "cache", "bin"))
+Update-CliinstPath -BinPath "${ACTIVE_TARGET_TOOL}" -IsSystemWide $($InstallEnv.IsAdmin)
 Set-EnvVariable "GOROOT" "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
-Set-EnvVariable "GOPATH" "$([IO.Path]::Combine("$($InstallEnv.ActiveTarget)", "Cache"))" -IsSystemWide $($InstallEnv.IsAdmin)
+Set-EnvVariable "GOPATH" "$([IO.Path]::Combine("$($InstallEnv.ActiveTarget)", "cache"))" -IsSystemWide $($InstallEnv.IsAdmin)
 Finalize-Install
