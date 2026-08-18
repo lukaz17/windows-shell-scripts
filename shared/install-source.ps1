@@ -84,6 +84,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://go.dev/dl/go${version}.windows-amd64.zip" }
 		Arm64Uri         = { param($version) "https://go.dev/dl/go${version}.windows-arm64.zip" }
 	}
+	"GolangCI Lint" = @{
+		GithubOwner      = "golangci"
+		GithubRepo       = "golangci-lint"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/golangci/golangci-lint/releases/download/v${version}/golangci-lint-${version}-windows-amd64.zip" }
+		Arm64Uri         = { param($version) "https://github.com/golangci/golangci-lint/releases/download/v${version}/golangci-lint-${version}-windows-arm64.zip" }
+	}
 	"Hugo" = @{
 		GithubOwner      = "gohugoio"
 		GithubRepo       = "hugo"
