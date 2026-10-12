@@ -10,6 +10,7 @@ The principles below are for all languages. They use camelCase for demonstration
 - Keep related things close: declarations near first use, callers near callees.
 - Always brace control-flow bodies (if/else, for, while, do, switch, when) even for a single statement; never rely on brace-less bodies.
 <!-- Project-specific / Formats -->
+- Start top-level `.ps1` scripts with a standard banner comment: program name, purpose, `Usage:`, `Example:`, then the MIT license block; see any existing script, consistency matters more than wording.
 
 ### Names
 
@@ -51,6 +52,8 @@ The principles below are for all languages. They use camelCase for demonstration
 
 - Format every `.ps1`/`.psm1`/`.psd1` file with PSScriptAnalyzer's `Invoke-Formatter`; never hand-format what it owns.
 <!-- Project-specific / PowerShell-Formats -->
+- Let EditorConfig format layout per `.editorconfig`: tabs for indent, LF, UTF-8, final newline.
+- Use `"${VAR}"` for a variable, `"$($Expr.Property)"` for member access; never pass a bare `$var` as an argument or write `$item.Prop` inside a string.
 
 ### Names
 
@@ -61,6 +64,7 @@ The principles below are for all languages. They use camelCase for demonstration
 - Never carry a Hungarian tag into a variable (`$strName`, `$iCount`), or leave a rename half-done with a `V2` noun or a `-Final` switch.
 - Never hide a verb in a cmdlet's noun (`Get-ProcessOrder`) — the verb names the action — and never a noun alone `Manager`, `Helper`, or `Util(s)`.
 <!-- Project-specific / PowerShell-Names -->
+- Name every function `Verb-Noun` form but with relaxed rules, all verbs are accepted.
 
 ### Functions And Types
 
@@ -71,6 +75,7 @@ The principles below are for all languages. They use camelCase for demonstration
 - Use `Write-Host` only for output meant for a human; use the pipeline (or `Write-Output`), `Write-Verbose`, and `Write-Warning` for everything else.
 - Split a function that both decides whether to act and performs the action; gate the action with `$PSCmdlet.ShouldProcess(...)` rather than a boolean parameter.
 <!-- Project-specific / PowerShell-Functions-And-Types -->
+- Use `Write-Host` with a `> Label:` status line as the CLI progress channel; return objects for data.
 
 ### Errors
 
@@ -79,6 +84,7 @@ The principles below are for all languages. They use camelCase for demonstration
 - Re-raise from a function with `$PSCmdlet.ThrowTerminatingError($_)` so the original `ErrorRecord`, category, and target survive for the caller.
 - Model an expected alternate outcome (not found, already exists) as a return value or a `-PassThru` result; reserve a thrown error for what the caller did not ask for.
 <!-- Project-specific / PowerShell-Errors -->
+- Check `$LASTEXITCODE` after every native command and fail fast; a CLI script stops with a clear message and non-zero exit instead of swallowing the failure.
 
 ### Modules And Visibility
 
@@ -102,6 +108,7 @@ The principles below are for all languages. They use camelCase for demonstration
 - Run `Invoke-Formatter` in CI or a pre-commit hook so layout never bikesheds a review.
 - Run Pester in CI, with coverage on `Public/` and `Private/` functions, not a manual run before release.
 <!-- Project-specific / PowerShell-Tooling -->
+- Write the `.ps1` scripts to target PowerShell 5.1 for maximum compatibility.
 
 ### Smells
 
@@ -112,6 +119,7 @@ The principles below are for all languages. They use camelCase for demonstration
 - A verb outside the approved list (`Create-`, `Delete-`, `Update-`) forcing an import warning.
 - A `$global:` variable standing in for a parameter or a module-scoped value.
 <!-- Project-specific / PowerShell-Smells -->
+- A script whose top lacks `$ErrorActionPreference = "Stop"` and `Set-StrictMode -Version Latest`.
 
 ## Project-specific
 
