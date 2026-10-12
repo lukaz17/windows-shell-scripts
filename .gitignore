@@ -1,0 +1,21 @@
+# Attunic Protocol transient memory
+.attunic/wip.md
+
+# Local env and secrets
+.env
+.env.*
+*.local.env
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# PowerShell test artifacts
+TestResults/
+testResults.xml
+
+# PowerShell module build output
+output/
+
+# Project-specific
