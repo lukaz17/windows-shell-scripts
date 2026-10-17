@@ -25,7 +25,6 @@ Set-StrictMode -Version Latest
 
 # Application info
 $PROGRAM_ID = "OpenCode"
-$PROGRAM_EXEC = "opencode.exe"
 
 # Shared library
 . "${PSScriptRoot}\shared\install-common.ps1"
@@ -36,7 +35,7 @@ $INSTALL_VERSION = ""
 if (${args}.Count -ge 1) {
 	$INSTALL_VERSION = ${args}[0].ToString()
 }
-$InstallSrc = Get-InstallSource "${PROGRAM_ID}"
+$InstallSrc = Get-InstallSource -ProgramId "${PROGRAM_ID}"
 $INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "${INSTALL_VERSION}"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}"
 
@@ -49,8 +48,8 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 	New-Directory2 "$($InstallEnv.TempTarget)"
 	Extract-Archive -ArchivePath "${BIN_ARCH_TMP_FILE}" -DestinationPath "$($InstallEnv.TempTarget)" -ScriptRoot "${PSScriptRoot}"
 	Remove-Item2 "${BIN_ARCH_TMP_FILE}"
-	$TEMP_TARGET_FINAL = $([IO.Path]::Combine("$($InstallEnv.TempTarget)"))
-	Move-Item2 -From "${TEMP_TARGET_FINAL}" -To "$($InstallEnv.InstallTarget)"
+	$INSTALL_TEMP_TARGET = $([IO.Path]::Combine("$($InstallEnv.TempTarget)"))
+	Move-Item2 -From "${INSTALL_TEMP_TARGET}" -To "$($InstallEnv.InstallTarget)"
 	Remove-Item2 "$($InstallEnv.TempTarget)"
 }
 
