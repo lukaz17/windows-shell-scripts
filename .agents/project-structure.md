@@ -13,7 +13,7 @@ The files holding the rules for working with this project are [coding-convention
 - Mirror the module layout the project uses (`Public/`, `Private/`, `Classes/`, `Tests/`); never add a loose top-level `.ps1` that duplicates a module function.
 - Keep one function per file under `Public/`/`Private/` when the project follows it, named identically to the function.
 - Keep build and packaging scripts (`build.ps1`) at the repository root, thin, and free of business logic.
-<!-- Project-specific / Guideline -->
+<!-- Project-specific / PowerShell-Guideline -->
 
 ### Layout
 
@@ -24,7 +24,7 @@ The files holding the rules for working with this project are [coding-convention
 ├── docs/           # design and user documents
 ├── examples/       # examples for applications and/or public libraries
 ├── src/            # module source: one folder per module, each with Public/, Private/, Classes/, <Module>.psd1, <Module>.psm1
-├── tests/          # Pester suites, fixtures, and test data
+├── tests/          # test suites, fixtures, and test data
 ├── .editorconfig   # editor formatting rules
 ├── .gitignore      # git ignore patterns
 ├── AGENTS.md       # instructions for AI coding agents
@@ -32,7 +32,7 @@ The files holding the rules for working with this project are [coding-convention
 ├── CLAUDE.md       # instructions specific for Claude coding agents
 ├── CONTRIBUTING.md # contribution guidelines
 ├── README.md       # project overview and pointing entry
-<!-- Project-specific / Layout -->
+<!-- Project-specific / PowerShell-Layout -->
 ```
 
 ### Layer Dependencies
@@ -43,7 +43,7 @@ Notes for declaring layers in the `Layer Dependencies` section of `.attunic/cont
 - Keep cmdlet-shaped types (`[PSCustomObject]`, a .NET type from a module you call) out of a domain class's public surface; convert at the boundary.
 - Keep module import and dependency wiring (`Import-Module`, `using module`) at the script or manifest level, never inside a function that also does the work.
 - Check by hand: a public function containing branching business rules instead of delegating to `Classes/` types or `Private/` helpers is a violation.
-<!-- Project-specific / Layer Dependencies -->
+<!-- Project-specific / PowerShell-Layer-Dependencies -->
 
 ## Project-specific
 

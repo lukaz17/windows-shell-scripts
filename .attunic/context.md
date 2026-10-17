@@ -44,10 +44,10 @@ List of important folders, files and their roles in the project:
 ├── .agents/                  # project AI agent instructions (attunic protocol, coding-conventions, development-guideline, pull-request-guideline)
 ├── .attunic/                 # project AI agent memory (context, memory, wip)
 ├── 7z-amd64/                 # bundled 7-Zip CLI for AMD64
-│   └── 7z.dll
+│   ├── 7z.dll
 │   └── 7z.exe
 ├── 7z-arm64/                 # bundled 7-Zip CLI for ARM64
-│   └── 7z.dll
+│   ├── 7z.dll
 │   └── 7z.exe
 ├── shared/                   # support libraries dot-sourced by top-level scripts
 │   ├── install-common.ps1    # installer script shared functions: safe file ops, install env initialization, extraction, shortcuts, PATH, finalization
@@ -55,7 +55,7 @@ List of important folders, files and their roles in the project:
 ├── .copier-answers.yml       # project Copier answers
 ├── .editorconfig             # editor formatting rules
 ├── .gitignore                # git ignore patterns
-└── README.md                 # project README
+├── README.md                 # project README
 ├── cliinst-install.ps1       # configure initial CliInst settings (env vars, CLIINST_PATH)
 ├── cliinst-update.ps1        # update this repository via git pull
 ├── registry-export.ps1       # export a Registry key as a PowerShell script

@@ -6,6 +6,7 @@ The principles below are for all languages. They use camelCase for demonstration
 
 ### Formats
 
+- Let the project's formatter own the format: run it when the project define an formatter or linter, its check must report no files.
 - Keep file content reads top-down: high-level intent first, details descending (newspaper metaphor).
 - Keep related things close: declarations near first use, callers near callees.
 - Always brace control-flow bodies (if/else, for, while, do, switch, when) even for a single statement; never rely on brace-less bodies.
@@ -23,6 +24,18 @@ The principles below are for all languages. They use camelCase for demonstration
 - Avoid generic names: (`data`, `manager`, `helper`, `util`, `info`, `result`) when a domain name exists.
 - Avoid noise: names that differ only by noise words or loose abbreviations.
 <!-- Project-specific / Names -->
+
+### Packages
+
+<!-- Project-specific / Packages -->
+
+### Types
+
+<!-- Project-specific / Types -->
+
+### Functions
+
+<!-- Project-specific / Functions -->
 
 ### Comments
 
@@ -50,7 +63,6 @@ The principles below are for all languages. They use camelCase for demonstration
 
 ### Formats
 
-- Format every `.ps1`/`.psm1`/`.psd1` file with PSScriptAnalyzer's `Invoke-Formatter`; never hand-format what it owns.
 <!-- Project-specific / PowerShell-Formats -->
 - Let EditorConfig format layout per `.editorconfig`: tabs for indent, LF, UTF-8, final newline.
 - Use `"${VAR}"` for a variable, `"$($Expr.Property)"` for member access; never pass a bare `$var` as an argument or write `$item.Prop` inside a string.
@@ -66,7 +78,18 @@ The principles below are for all languages. They use camelCase for demonstration
 <!-- Project-specific / PowerShell-Names -->
 - Name every function `Verb-Noun` form but with relaxed rules, all verbs are accepted.
 
-### Functions And Types
+### Packages
+
+- Ship a module as a `.psm1` plus a `.psd1` manifest that lists `FunctionsToExport`; never export with a wildcard.
+- Split `Public/` (one file per exported function) from `Private/` (internal helpers); export only the public folder.
+- Keep a function private unless another script or module is meant to call it.
+<!-- Project-specific / PowerShell-Packages -->
+
+### Types
+
+<!-- Project-specific / PowerShell-Types -->
+
+### Functions
 
 - Start every function with `[CmdletBinding()]` (add `SupportsShouldProcess` when it changes state) so common parameters, `-Verbose`, and `-WhatIf` come for free.
 - Type every parameter and validate it declaratively (`[ValidateNotNullOrEmpty()]`, `[ValidateRange()]`, `[ValidateSet()]`) instead of an early `if` that throws.
@@ -74,8 +97,13 @@ The principles below are for all languages. They use camelCase for demonstration
 - Emit objects (`[PSCustomObject]`, a typed class, or a domain type) from a function that returns data; never format it as a string for a caller to re-parse.
 - Use `Write-Host` only for output meant for a human; use the pipeline (or `Write-Output`), `Write-Verbose`, and `Write-Warning` for everything else.
 - Split a function that both decides whether to act and performs the action; gate the action with `$PSCmdlet.ShouldProcess(...)` rather than a boolean parameter.
-<!-- Project-specific / PowerShell-Functions-And-Types -->
+- Never rely on a `$global:` variable to pass state between functions; pass parameters and return values instead.
+<!-- Project-specific / PowerShell-Functions -->
 - Use `Write-Host` with a `> Label:` status line as the CLI progress channel; return objects for data.
+
+### Comments
+
+<!-- Project-specific / PowerShell-Comments -->
 
 ### Errors
 
@@ -86,29 +114,11 @@ The principles below are for all languages. They use camelCase for demonstration
 <!-- Project-specific / PowerShell-Errors -->
 - Check `$LASTEXITCODE` after every native command and fail fast; a CLI script stops with a clear message and non-zero exit instead of swallowing the failure.
 
-### Modules And Visibility
-
-- Ship a module as a `.psm1` plus a `.psd1` manifest that lists `FunctionsToExport`; never export with a wildcard.
-- Split `Public/` (one file per exported function) from `Private/` (internal helpers); export only the public folder.
-- Keep a function private unless another script or module is meant to call it.
-- Never rely on a `$global:` variable to pass state between functions; pass parameters and return values instead.
-<!-- Project-specific / PowerShell-Modules-And-Visibility -->
-
 ### Tests
 
-- Use Pester (5 or 6); existing `Should -Be` assertions keep working on either, so match whichever the project has installed.
-- Structure specs `Describe`/`Context`/`It` around behavior, and mock the filesystem, network, or registry a function calls rather than hitting them for real (F.I.R.S.T.).
+- Write specs around behavior, and mock the filesystem, network, or registry a function calls rather than hitting them for real (F.I.R.S.T.).
 - Test parameter validation and the `ShouldProcess` branch explicitly; `-WhatIf` must produce no side effect.
 <!-- Project-specific / PowerShell-Tests -->
-
-### Tooling
-
-- Target PowerShell 7.4+ (7.6 LTS current); write Windows PowerShell 5.1-compatible syntax only where a host requires it.
-- Run PSScriptAnalyzer in CI (`Invoke-ScriptAnalyzer -Recurse`) with at least `PSUseApprovedVerbs`, `PSAvoidUsingCmdletAliases`, `PSAvoidUsingWriteHost`, `PSUseShouldProcessForStateChangingFunctions`, and `PSAvoidGlobalVars` enabled.
-- Run `Invoke-Formatter` in CI or a pre-commit hook so layout never bikesheds a review.
-- Run Pester in CI, with coverage on `Public/` and `Private/` functions, not a manual run before release.
-<!-- Project-specific / PowerShell-Tooling -->
-- Write the `.ps1` scripts to target PowerShell 5.1 for maximum compatibility.
 
 ### Smells
 
