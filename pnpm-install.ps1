@@ -36,7 +36,7 @@ $INSTALL_VERSION = ""
 if (${args}.Count -ge 1) {
 	$INSTALL_VERSION = ${args}[0].ToString()
 }
-$InstallSrc = Get-InstallSource "${PROGRAM_ID}"
+$InstallSrc = Get-InstallSource -ProgramId "${PROGRAM_ID}"
 $INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "${INSTALL_VERSION}"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}"
 
@@ -46,13 +46,14 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 	$BIN_URI_ARM64 = Get-Arm64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
 	$BIN_TMP_FILE = "$($InstallEnv.TempTarget).exe"
 	Download-UriPerArch -Amd64Uri "${BIN_URI_AMD64}" -Arm64Uri "${BIN_URI_ARM64}" -OutputPath "${BIN_TMP_FILE}"
-	New-Directory2 "$($InstallEnv.TempTarget)"
-	Move-Item2 -From "${BIN_TMP_FILE}" -To ([IO.Path]::Combine($($InstallEnv.TempTarget), ${PROGRAM_EXEC}))
-	Move-Item2 -From "$([IO.Path]::Combine($($InstallEnv.TempTarget)))" -To "$($InstallEnv.InstallTarget)"
-	Remove-Item2 "$($InstallEnv.TempTarget)"
+	New-Directory2 -Path "$($InstallEnv.TempTarget)"
+	Move-Item2 -From "${BIN_TMP_FILE}" -To "$($InstallEnv.TempTarget)\${PROGRAM_EXEC}"
+	Move-Item2 -From "$($InstallEnv.TempTarget)" -To "$($InstallEnv.InstallTarget)"
+	Remove-Item2 -Path "$($InstallEnv.TempTarget)"
 }
 
 # Finalize install
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
 Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
+Set-EnvVariable -Name "PNPM_HOME" -Value "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
 Finalize-Install
