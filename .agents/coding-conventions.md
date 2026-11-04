@@ -4,12 +4,16 @@
 
 The principles below are for all languages. They use camelCase for demonstration purposes; adapt casing to the language's style.
 
+When a language's established idiom contradicts a principle below, follow the idiom even when its section doesn't name it (e.g. PowerShell's `-Force` switch parameter).
+
 ### Formats
 
-- Let the project's formatter own the format: run it when the project define an formatter or linter, its check must report no files.
-- Keep file content reads top-down: high-level intent first, details descending (newspaper metaphor).
-- Keep related things close: declarations near first use, callers near callees.
-- Always brace control-flow bodies (if/else, for, while, do, switch, when) even for a single statement; never rely on brace-less bodies.
+- Let the project's formatter own the format: run the formatter declared in [context.md's Supporting Tools](../.attunic/context.md#supporting-tools), if any; its check mode must report no file to change.
+- Follow `.editorconfig` for indentation, line endings, charset, and final newline; it wins over editor and community defaults (e.g. tab indentation where a language has no official rule).
+- Use ASCII punctuation and straight quotes by default in code, comments, and docs; use non-ASCII characters only where the content requires them (names, quoted text, symbols with no ASCII form, box-drawing in layout trees).
+- Order file content top-down: high-level intent first, details descending; in a code file: file-level constants and variables, then exported identifiers, then private helpers.
+- Keep related things close: local declarations near first use, callers near callees.
+- Never pad comments or docs outside quoted text with filler (e.g. `simply`, `really`, `in order to`), meaningless words, or a sentence restating the one before it.
 <!-- Project-specific / Formats -->
 - Start top-level `.ps1` scripts with a standard banner comment: program name, purpose, `Usage:`, `Example:`, then the MIT license block; see any existing script, consistency matters more than wording.
 
@@ -17,79 +21,96 @@ The principles below are for all languages. They use camelCase for demonstration
 
 - Use one word per concept across the codebase; never one word for two concepts.
 - Use intention-revealing names: the name says why it exists and what it does, with no mental mapping from a terse abbreviation to a concept.
-- Include units in names where values carry them (e.g. `timeoutMs`, `maxBytes`).
-- Function names: start with a verb, and disclose side effects (`save`, `delete`, `publish`, or `mutate`).
-- Acronyms: stay consistently cased (e.g. `ID`, `URL`, `HTTP`, not `Id`, `Url`, `Http`).
-- Booleans: name as predicates (`isReady`, `hasItems`, `canRetry`).
-- Avoid generic names: (`data`, `manager`, `helper`, `util`, `info`, `result`) when a domain name exists.
-- Avoid noise: names that differ only by noise words or loose abbreviations.
+- Include units in names where the type does not carry them (e.g. `timeoutMs`, `maxBytes`); a value typed as a duration or size needs none.
+- Start the name of a function that performs an action with a verb that discloses its side effects (`save`, `delete`, `publish`, `mutate`); name a side-effect-free accessor for what it returns (`owner`, `totalPrice`).
+- Case acronyms consistently, following the language's convention; never mix forms in one codebase (`userId` beside `userID`).
+- Name booleans as predicates (`isReady`, `hasItems`, `canRetry`), never as negations (`isNotReady`).
+- Never write a vague name (`data`, `info`, `obj`, `temp`, `result`) when a domain name exists; a loop index, a lambda or callback parameter, a caught error, or an established short form may stay short; nothing else may.
+- Never write a bare-verb function with no object (`handle`, `process`); a method's receiver counts as its object (`file.close()`).
+- Never number or version a name instead of replacing the original (`user2`, `dataV2`, `_new`, `_final`, `_copy`).
+- Never suffix a type with a noise word (`Manager`, `Helper`, `Util`) or name it after a verb (`ProcessOrder`).
+- Avoid magic numbers or strings; use a named constant for the meaning, or attach an inline *why* comment.
 <!-- Project-specific / Names -->
 
 ### Packages
 
+- Use the narrowest visibility; export only what another module must use.
+- Name a module for the domain concept it owns; never add to a catch-all `utils`, `helpers`, or `common`.
 <!-- Project-specific / Packages -->
 
 ### Types
 
+- Avoid unnecessary abstraction: introduce an interface, trait, protocol, or abstract base only once two implementations exist; a test double counts as one.
 <!-- Project-specific / Types -->
 
 ### Functions
 
+- Keep functions small, at one level of abstraction; extract a named function instead of nesting another branch or commenting a block.
+- Keep positional parameters to three or fewer; past that, group related values into one parameter object.
+- Prefer early exits for invalid or terminal cases over nested conditionals.
+- Never switch behavior on a boolean parameter; write two functions or take a small enum.
+- Never mutate an input the caller does not expect to change; return a new value instead.
 <!-- Project-specific / Functions -->
 
 ### Comments
 
-- Document every exported identifier (constants, vars, types, methods, functions) with a doc comment.
-- Write comments explaining *why*, not *what*; the code already shows what it does.
-- Cut articles, filler, and hedging; keep IDs, numbers, links, and warnings whole.
-- Keep comments short and concise: they should be one to three lines; longer explanations belong in a doc file the comment points to, or an extracted function.
+- Document every exported identifier with a doc comment stating its contract: what it is or does, and what a caller must know.
+- Write inline comments explaining *why*, not *what*.
+- Cut hedging from comments, and articles from inline comments; keep IDs, numbers, links, and warnings whole.
+- Keep inline comments short: one to three lines; longer explanations belong in a doc file the comment points to, or an extracted function.
 - Keep comments up to date with the code: a stale comment is worse than no comment.
 - Keep comments about: non-obvious constraints, legal requirements, algorithmic tradeoffs, external system quirks, warnings of consequences, and TODOs with context and ownership.
-- Delete comment noise: redundant restatements, change journals, attributions, banner or position markers, closing-brace labels, and commented-out code.
-- Never delete or reword comments a tool reads (shebangs, encoding lines, license and SPDX headers, build and compiler directives, suppressions, doctests, generated-file headers). An unexplained suppression is a finding, not a comment to delete.
+- Never write comment noise: redundant restatements, change journals, attributions, banner or position markers, closing-brace labels, and commented-out code.
+- Never delete or reword comments a tool reads (shebangs, encoding lines, license and SPDX headers, build and compiler directives, suppressions, doctests, generated-file headers).
 <!-- Project-specific / Comments -->
 
 ### Errors
 
-- Handle errors explicitly where a meaningful decision can be made.
+- Handle each error once, where a meaningful decision can be made; elsewhere propagate it, and never log and rethrow it at every frame.
 - Wrap errors with original cause and context when propagating.
-- Error strings should be lowercase and not end with punctuation (they're often composed into larger messages).
-- Make retry, fallback, timeout, and cancellation behavior explicit.
-- Never log secrets, tokens, and sensitive data in error messages and logs.
+- Model an expected outcome (not found, declined, empty) as a value, an optional, or a result type, never a sentinel value (`-1`, `""`); reserve the language's error mechanism for genuine failures.
+- Reserve crashes (panic, abort, process exit) for programmer errors the caller cannot act on; never crash library code on an expected failure.
+- Write user-facing error messages as actionable sentences; never expose internals (stack traces, queries, file paths) in them.
 - Never swallow errors or catch broadly without handling, wrapping, or propagating with context.
 <!-- Project-specific / Errors -->
 
+### Concurrency
+
+- Give every concurrent task an owner that can wait for it or cancel it; never start one that nothing can stop.
+- Keep shared mutable state to a minimum; hold a lock as briefly as possible, and never across a suspension point.
+- Treat every suspension point as a place where shared state can change; re-check invariants after it.
+- Never block an event loop or async runtime with blocking I/O or long computation; hand it to an async API, a worker, or a blocking-task pool.
+<!-- Project-specific / Concurrency -->
+
 ## PowerShell
 
-### Formats
+### PowerShell-Formats
 
 <!-- Project-specific / PowerShell-Formats -->
 - Let EditorConfig format layout per `.editorconfig`: tabs for indent, LF, UTF-8, final newline.
 - Use `"${VAR}"` for a variable, `"$($Expr.Property)"` for member access; never pass a bare `$var` as an argument or write `$item.Prop` inside a string.
 
-### Names
+### PowerShell-Names
 
 - Name every function `Verb-Noun` with an approved verb (`Get-Verb` lists them) and a singular noun (`Get-User`, never `Get-Users` or `List-Users`).
 - Add a vendor or module prefix to the noun to avoid colliding with a built-in or another module's command (`Get-MyAppUser`).
 - Name parameters in PascalCase for their meaning, matching cmdlet convention (`-Path`, `-Force`), never an abbreviation only the author understands.
-- Never noun a function `Data`, `Info`, or `Item`, or hold one value in `$data`/`$temp`; keep a name that short only for a loop index or `$_`.
-- Never carry a Hungarian tag into a variable (`$strName`, `$iCount`), or leave a rename half-done with a `V2` noun or a `-Final` switch.
-- Never hide a verb in a cmdlet's noun (`Get-ProcessOrder`) — the verb names the action — and never a noun alone `Manager`, `Helper`, or `Util(s)`.
+- Never hide a verb in a cmdlet's noun (`Get-ProcessOrder`); the verb names the action.
 <!-- Project-specific / PowerShell-Names -->
 - Name every function `Verb-Noun` form but with relaxed rules, all verbs are accepted.
 
-### Packages
+### PowerShell-Packages
 
 - Ship a module as a `.psm1` plus a `.psd1` manifest that lists `FunctionsToExport`; never export with a wildcard.
-- Split `Public/` (one file per exported function) from `Private/` (internal helpers); export only the public folder.
+- Split exported functions (`Public/`) from internal helpers (`Private/`); export only the public folder.
 - Keep a function private unless another script or module is meant to call it.
 <!-- Project-specific / PowerShell-Packages -->
 
-### Types
+### PowerShell-Types
 
 <!-- Project-specific / PowerShell-Types -->
 
-### Functions
+### PowerShell-Functions
 
 - Start every function with `[CmdletBinding()]` (add `SupportsShouldProcess` when it changes state) so common parameters, `-Verbose`, and `-WhatIf` come for free.
 - Type every parameter and validate it declaratively (`[ValidateNotNullOrEmpty()]`, `[ValidateRange()]`, `[ValidateSet()]`) instead of an early `if` that throws.
@@ -101,36 +122,23 @@ The principles below are for all languages. They use camelCase for demonstration
 <!-- Project-specific / PowerShell-Functions -->
 - Use `Write-Host` with a `> Label:` status line as the CLI progress channel; return objects for data.
 
-### Comments
+### PowerShell-Comments
 
 <!-- Project-specific / PowerShell-Comments -->
 
-### Errors
+### PowerShell-Errors
 
 - Set `$ErrorActionPreference = 'Stop'` at script scope so a cmdlet's non-terminating error becomes catchable; pass `-ErrorAction Stop` to calls inside a shared module.
 - Catch specific exception types (`catch [System.IO.IOException]`) before a general `catch`; never catch everything to swallow it.
 - Re-raise from a function with `$PSCmdlet.ThrowTerminatingError($_)` so the original `ErrorRecord`, category, and target survive for the caller.
-- Model an expected alternate outcome (not found, already exists) as a return value or a `-PassThru` result; reserve a thrown error for what the caller did not ask for.
+- Return an expected alternate outcome (not found, already exists) as a value or a `-PassThru` result, not a thrown error.
 <!-- Project-specific / PowerShell-Errors -->
 - Check `$LASTEXITCODE` after every native command and fail fast; a CLI script stops with a clear message and non-zero exit instead of swallowing the failure.
 
-### Tests
+### PowerShell-Concurrency
 
-- Write specs around behavior, and mock the filesystem, network, or registry a function calls rather than hitting them for real (F.I.R.S.T.).
-- Test parameter validation and the `ShouldProcess` branch explicitly; `-WhatIf` must produce no side effect.
-<!-- Project-specific / PowerShell-Tests -->
-
-### Smells
-
-- An alias (`gci`, `%`, `?`, `echo`) left in a script instead of the full cmdlet name.
-- A function that writes formatted text and expects a caller to regex-parse it back into data instead of returning an object.
-- `Invoke-Expression` building a command from string concatenation, where a script block or splatted parameters would do.
-- A state-changing function with no `SupportsShouldProcess`, so `-WhatIf` and `-Confirm` silently do nothing.
-- A verb outside the approved list (`Create-`, `Delete-`, `Update-`) forcing an import warning.
-- A `$global:` variable standing in for a parameter or a module-scoped value.
-<!-- Project-specific / PowerShell-Smells -->
-- A script whose top lacks `$ErrorActionPreference = "Stop"` and `Set-StrictMode -Version Latest`.
+<!-- Project-specific / PowerShell-Concurrency -->
 
 ## Project-specific
 
-<!-- Project-specific -->
+<!-- Project-specific / Project-specific -->

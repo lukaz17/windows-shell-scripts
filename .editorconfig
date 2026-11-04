@@ -8,10 +8,20 @@ indent_style = tab
 insert_final_newline = true
 trim_trailing_whitespace = true
 
-[*.{json,md,toml,yaml,yml}]
-indent_style = space
-
-[*.{ps1,psm1,psd1}]
+[{Makefile,makefile,GNUmakefile,*.mk}]
 indent_style = tab
 
+[*.md]
+indent_style = space
+
+[*.{yaml,yml}]
+indent_style = space
+
+[*.{ps1,psd1,psm1}]
+indent_size = 4
+indent_style = space
+
 # Project-specific
+[*.{ps1,psd1,psm1}]
+indent_size = 4
+indent_style = tab
