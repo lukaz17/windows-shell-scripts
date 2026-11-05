@@ -8,10 +8,8 @@
 #
 ################################################################################
 
-Set-PSDebug -Trace 0
-
 # ------------------------------------------------------------------------------
-# Create a directory safely
+# Create a directory safely.
 # ------------------------------------------------------------------------------
 function New-Directory2 {
 	param(
@@ -25,7 +23,7 @@ function New-Directory2 {
 }
 
 # ------------------------------------------------------------------------------
-# Remove file/folder safely
+# Remove file/folder safely.
 # ------------------------------------------------------------------------------
 function Remove-Item2 {
 	param(
@@ -39,7 +37,7 @@ function Remove-Item2 {
 }
 
 # ------------------------------------------------------------------------------
-# Copy file/folder safely
+# Copy file/folder safely.
 # ------------------------------------------------------------------------------
 function Copy-Item2 {
 	param(
@@ -49,7 +47,7 @@ function Copy-Item2 {
 	)
 
 	if (${Overwrite}) {
-		Remove-Item2 "${To}"
+		Remove-Item2 -Path "${To}"
 	}
 
 	Write-Host "> Copy Item:    ${From} -> ${To}"
@@ -57,7 +55,7 @@ function Copy-Item2 {
 }
 
 # ------------------------------------------------------------------------------
-# Move file/folder safely
+# Move file/folder safely.
 # ------------------------------------------------------------------------------
 function Move-Item2 {
 	param(
@@ -67,7 +65,7 @@ function Move-Item2 {
 	)
 
 	if (${Overwrite}) {
-		Remove-Item2 "${To}"
+		Remove-Item2 -Path "${To}"
 	}
 
 	Write-Host "> Move Item:    ${From} -> ${To}"
@@ -75,7 +73,7 @@ function Move-Item2 {
 }
 
 # ------------------------------------------------------------------------------
-# Create file/folder junction safely
+# Create file/folder junction safely.
 # ------------------------------------------------------------------------------
 function Link-Item2 {
 	param(
@@ -86,7 +84,7 @@ function Link-Item2 {
 	)
 
 	if (${Overwrite}) {
-		Remove-Item2 "${To}"
+		Remove-Item2 -Path "${To}"
 	}
 
 	Write-Host "> Link Item:    ${From} -> ${To}"
@@ -95,7 +93,7 @@ function Link-Item2 {
 }
 
 # ------------------------------------------------------------------------------
-# Download from URI
+# Download from URI.
 # ------------------------------------------------------------------------------
 function Download-Uri {
 	param(
@@ -120,7 +118,7 @@ function Download-Uri {
 }
 
 # ------------------------------------------------------------------------------
-# Normalize install version for consistency
+# Normalize install version for consistency.
 # ------------------------------------------------------------------------------
 function Normalize-InstallVersion {
 	param(
@@ -154,7 +152,7 @@ function Get-VersionSortKey {
 }
 
 # ------------------------------------------------------------------------------
-# Check that the first version is not older than the second
+# Check that the first version is not older than the second.
 # ------------------------------------------------------------------------------
 function Test-VersionAtLeast {
 	param(
@@ -166,7 +164,7 @@ function Test-VersionAtLeast {
 }
 
 # ------------------------------------------------------------------------------
-# Check that the first version is not newer than the second
+# Check that the first version is not newer than the second.
 # ------------------------------------------------------------------------------
 function Test-VersionAtMost {
 	param(
@@ -178,7 +176,7 @@ function Test-VersionAtMost {
 }
 
 # ------------------------------------------------------------------------------
-# Get latest version from GitHub
+# Get latest version from GitHub.
 # ------------------------------------------------------------------------------
 function Get-InstallVersionFromGithub {
 	param(
@@ -206,11 +204,11 @@ function Get-InstallVersionFromGithub {
 	}
 
 	Write-Host "> Latest Version:  ${version}"
-	return Normalize-InstallVersion "${version}" -TagPrefix "${TagPrefix}"
+	return Normalize-InstallVersion -Version "${version}" -TagPrefix "${TagPrefix}"
 }
 
 # ------------------------------------------------------------------------------
-# Initialize environment for the install and pre-populate root dirs
+# Initialize environment for the install and pre-populate root dirs.
 # ------------------------------------------------------------------------------
 function Initialize-InstallEnv {
 	param(
@@ -225,37 +223,39 @@ function Initialize-InstallEnv {
 	Write-Host "> Init InstEnv: ${ProgramId} v${Version} ${arch}"
 
 	if (${isAdmin}) {
-		$installRoot = [IO.Path]::Combine(${env:PROGRAMFILES}, ${ProgramId})
-		$desktopRoot = [IO.Path]::Combine(${env:ALLUSERSPROFILE}, "Desktop")
-		$startMenuRoot = [IO.Path]::Combine(${env:ALLUSERSPROFILE}, "Start Menu", "Apps")
+		$installRoot = "${env:PROGRAMFILES}\${ProgramId}"
+		$desktopRoot = "${env:ALLUSERSPROFILE}\Desktop"
+		$startMenuRoot = "${env:ALLUSERSPROFILE}\Start Menu\Apps"
 	} else {
-		$installRoot = [IO.Path]::Combine(${env:USERPROFILE}, ".local", "share", ${ProgramId})
-		$desktopRoot = [IO.Path]::Combine(${env:USERPROFILE}, "Desktop")
-		$startMenuRoot = [IO.Path]::Combine(${env:USERPROFILE}, "Start Menu", "Apps")
+		$installRoot = "${env:USERPROFILE}\.local\share\${ProgramId}"
+		$desktopRoot = "${env:USERPROFILE}\Desktop"
+		$startMenuRoot = "${env:USERPROFILE}\Start Menu\Apps"
 	}
 	$tempRoot = ${env:TEMP}
-	$userProfileData = [IO.Path]::Combine(${env:USERPROFILE}, ".local")
+	$userProfileData = "${env:USERPROFILE}\.local"
 
+	# User-set values may end in a separator, which would double up in the joined paths
 	if ("${env:CLIINST_USR_LOCAL_SHARE}" -ne "") {
-		$installRoot = [IO.Path]::Combine(${env:CLIINST_USR_LOCAL_SHARE}, ${ProgramId})
+		$localShare = "${env:CLIINST_USR_LOCAL_SHARE}".TrimEnd('\', '/')
+		$installRoot = "${localShare}\${ProgramId}"
 	}
 	if ("${env:CLIINST_USR_PROFILE}" -ne "") {
 		$userProfileData = "${env:CLIINST_USR_PROFILE}"
 	}
 	if ("${env:CLIINST_TEMP}" -ne "") {
-		$tempRoot = "${env:CLIINST_TEMP}"
+		$tempRoot = "${env:CLIINST_TEMP}".TrimEnd('\', '/')
 	}
 
-	$installTarget = [IO.Path]::Combine(${installRoot}, "${ProgramId}-v${Version}")
+	$installTarget = "${installRoot}\${ProgramId}-v${Version}"
 	$activeSuffix = if ("${ActiveTag}" -ne "") { "-${ActiveTag}" } else { "" }
-	$activeTarget  = [IO.Path]::Combine(${installRoot}, "active-release${activeSuffix}")
-	$tempTarget  = [IO.Path]::Combine(${tempRoot}, "${ProgramId}-v${Version}")
+	$activeTarget  = "${installRoot}\active-release${activeSuffix}"
+	$tempTarget  = "${tempRoot}\${ProgramId}-v${Version}"
 
-	New-Directory2 "${installRoot}"
-	New-Directory2 "${tempRoot}"
-	New-Directory2 "${userProfileData}"
+	New-Directory2 -Path "${installRoot}"
+	New-Directory2 -Path "${tempRoot}"
+	New-Directory2 -Path "${userProfileData}"
 	if (${IsApplication}) {
-		New-Directory2 "${startMenuRoot}"
+		New-Directory2 -Path "${startMenuRoot}"
 	}
 
 	return @{
@@ -273,7 +273,7 @@ function Initialize-InstallEnv {
 }
 
 # ------------------------------------------------------------------------------
-# Download different file based on current system architecture
+# Download different file based on current system architecture.
 # ------------------------------------------------------------------------------
 function Download-UriPerArch {
 	param(
@@ -307,7 +307,7 @@ function Download-UriPerArch {
 }
 
 # ------------------------------------------------------------------------------
-# Move file/folder based on current system architecture
+# Move file/folder based on current system architecture.
 # ------------------------------------------------------------------------------
 function Move-ItemPerArch {
 	param(
@@ -341,7 +341,7 @@ function Move-ItemPerArch {
 }
 
 # ------------------------------------------------------------------------------
-# Extract archive
+# Extract archive.
 # ------------------------------------------------------------------------------
 function Extract-Archive {
 	param(
@@ -356,22 +356,26 @@ function Extract-Archive {
 	} else {
 		$arch = ${env:PROCESSOR_ARCHITECTURE}
 		if ("${arch}" -eq "AMD64") {
-			$7zCli = [IO.Path]::Combine(${ScriptRoot}, "7z-amd64", "7z.exe")
+			$7zCli = "${ScriptRoot}\7z-amd64\7z.exe"
 		} elseif ("${arch}" -eq "ARM64") {
-			$7zCli = [IO.Path]::Combine(${ScriptRoot}, "7z-arm64", "7z.exe")
+			$7zCli = "${ScriptRoot}\7z-arm64\7z.exe"
 		} else {
 			Write-Output "Unsupported architecture: ${arch}"
 			exit 1
 		}
 	}
 
-	New-Directory2 "${DestinationPath}"
-	Write-Host "> Exract Arch:  ${ArchivePath} -> ${DestinationPath}"
-	& "${7zCli}" x "${ArchivePath}" "-o${DestinationPath}"
+	New-Directory2 -Path "${DestinationPath}"
+	Write-Host "> Extract Arch: ${ArchivePath} -> ${DestinationPath}"
+	& "${7zCli}" x "${ArchivePath}" "-o${DestinationPath}" -y
+	if (${LASTEXITCODE} -ne 0) {
+		Write-Output "Extract-Archive: 7z failed with exit code ${LASTEXITCODE}"
+		exit 1
+	}
 }
 
 # ------------------------------------------------------------------------------
-# Set environment variable
+# Set environment variable.
 # ------------------------------------------------------------------------------
 function Set-EnvVariable {
 	param(
@@ -386,7 +390,7 @@ function Set-EnvVariable {
 }
 
 # ------------------------------------------------------------------------------
-# Remove environment variable
+# Remove environment variable.
 # ------------------------------------------------------------------------------
 function Remove-EnvVariable {
 	param(
@@ -453,7 +457,7 @@ function Update-CliinstPath {
 }
 
 # ------------------------------------------------------------------------------
-# Create shortcut for desktop application
+# Create shortcut for desktop application.
 # ------------------------------------------------------------------------------
 function New-AppShortcut {
 	param(
@@ -463,8 +467,8 @@ function New-AppShortcut {
 		[Parameter(Mandatory)] [string] $Destination
 	)
 
-	$shortcutPath = [IO.Path]::Combine(${Destination}, "${ProgramName}.lnk")
-	Remove-Item2 "${shortcutPath}"
+	$shortcutPath = "${Destination}\${ProgramName}.lnk"
+	Remove-Item2 -Path "${shortcutPath}"
 	Write-Host "> New Shortcut: ${TargetExe} -> ${shortcutPath}"
 	$wshShell = New-Object -ComObject WScript.Shell
 	$shortcut = ${wshShell}.CreateShortcut($shortcutPath)
