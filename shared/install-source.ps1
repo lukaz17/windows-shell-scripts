@@ -126,6 +126,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/Kilo-Org/kilocode/releases/download/v${version}/kilo-windows-x64.zip" }
 		Arm64Uri         = { param($version) "https://github.com/Kilo-Org/kilocode/releases/download/v${version}/kilo-windows-arm64.zip" }
 	}
+	"MariaDB" = @{
+		GithubOwner      = ""
+		GithubRepo       = ""
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) Get-MariaDbUri -Version "${version}" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"Mozilla Firefox" = @{
 		GithubOwner      = "mozilla-firefox"
 		GithubRepo       = "firefox"
@@ -315,6 +322,30 @@ function Get-FanControlUri {
 	}
 
 	return "https://github.com/Rem0o/FanControl.Releases/releases/download/V${Version}/${asset}"
+}
+
+# ------------------------------------------------------------------------------
+# Return MariaDB binaries download URL.
+# ------------------------------------------------------------------------------
+function Get-MariaDbUri {
+	param(
+		[Parameter(Mandatory)] [string] $Version
+	)
+
+	# The URL follows a pattern, but only the API tells whether a release has a Windows ZIP, so it must not be built from the version
+	$apiResponse = Invoke-WebRequest -UseBasicParsing "https://downloads.mariadb.org/rest-api/mariadb/${Version}" | ConvertFrom-Json
+	$matchedFile =$($apiResponse.release_data.${Version}.files) | Where-Object {
+		$_.package_type -eq "ZIP file" -and
+		$_.os -eq "Windows" -and
+		$_.cpu -eq "x86_64" -and
+		$_.file_name -notmatch "debugsymbols"
+	} | Select-Object -First 1
+	if ($null -eq ${matchedFile}) {
+		Write-Output "Get-MariaDbUri: No matching file found for version ${Version}"
+		exit 1
+	}
+
+	return $($matchedFile.file_download_url)
 }
 
 # ------------------------------------------------------------------------------
