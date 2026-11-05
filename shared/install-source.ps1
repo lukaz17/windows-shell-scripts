@@ -165,8 +165,22 @@ $Script:ProgramSourceTable = @{
 		GithubOwner      = "pnpm"
 		GithubRepo       = "pnpm"
 		SourceForgeProj  = ""
-		Amd64Uri         = { param($version) "https://github.com/pnpm/pnpm/releases/download/v${version}/pnpm-win-x64.exe" }
-		Arm64Uri         = { param($version) "https://github.com/pnpm/pnpm/releases/download/v${version}/pnpm-win-arm64.exe" }
+		Amd64Uri         = {
+			param($version)
+			if (Test-VersionAtLeast -Version "${version}" -Anchor "11") {
+				"https://github.com/pnpm/pnpm/releases/download/v${version}/pnpm-win32-x64.zip"
+			} else {
+				"https://github.com/pnpm/pnpm/releases/download/v${version}/pnpm-win-x64.exe"
+			}
+		}
+		Arm64Uri         = {
+			param($version)
+			if (Test-VersionAtLeast -Version "${version}" -Anchor "11") {
+				"https://github.com/pnpm/pnpm/releases/download/v${version}/pnpm-win32-arm64.zip"
+			} else {
+				"https://github.com/pnpm/pnpm/releases/download/v${version}/pnpm-win-arm64.exe"
+			}
+		}
 	}
 	"PostgreSQL" = @{
 		GithubOwner      = ""

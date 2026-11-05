@@ -44,10 +44,18 @@ $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTA
 if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 	$BIN_URI_AMD64 = Get-Amd64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
 	$BIN_URI_ARM64 = Get-Arm64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
-	$BIN_TMP_FILE = "$($InstallEnv.TempTarget).exe"
-	Download-UriPerArch -Amd64Uri "${BIN_URI_AMD64}" -Arm64Uri "${BIN_URI_ARM64}" -OutputPath "${BIN_TMP_FILE}"
-	New-Directory2 -Path "$($InstallEnv.TempTarget)"
-	Move-Item2 -From "${BIN_TMP_FILE}" -To "$($InstallEnv.TempTarget)\${PROGRAM_EXEC}"
+	if (Test-VersionAtLeast -Version "${INSTALL_VERSION}" -Anchor "11") {
+		$BIN_TMP_FILE = "$($InstallEnv.TempTarget).zip"
+		Download-UriPerArch -Amd64Uri "${BIN_URI_AMD64}" -Arm64Uri "${BIN_URI_ARM64}" -OutputPath "${BIN_TMP_FILE}"
+		New-Directory2 -Path "$($InstallEnv.TempTarget)"
+		Extract-Archive -ArchivePath "${BIN_TMP_FILE}" -DestinationPath "$($InstallEnv.TempTarget)" -ScriptRoot "${PSScriptRoot}"
+		Remove-Item2 -Path "${BIN_TMP_FILE}"
+	} else {
+		$BIN_TMP_FILE = "$($InstallEnv.TempTarget).exe"
+		Download-UriPerArch -Amd64Uri "${BIN_URI_AMD64}" -Arm64Uri "${BIN_URI_ARM64}" -OutputPath "${BIN_TMP_FILE}"
+		New-Directory2 -Path "$($InstallEnv.TempTarget)"
+		Move-Item2 -From "${BIN_TMP_FILE}" -To "$($InstallEnv.TempTarget)\${PROGRAM_EXEC}"
+	}
 	Move-Item2 -From "$($InstallEnv.TempTarget)" -To "$($InstallEnv.InstallTarget)"
 	Remove-Item2 -Path "$($InstallEnv.TempTarget)"
 }
@@ -55,5 +63,8 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 # Finalize install
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
 Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
+if (Test-VersionAtLeast -Version "${INSTALL_VERSION}" -Anchor "11") {
+	Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)\bin" -IsSystemWide $($InstallEnv.IsAdmin)
+}
 Set-EnvVariable -Name "PNPM_HOME" -Value "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
 Finalize-Install
