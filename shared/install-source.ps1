@@ -113,8 +113,8 @@ $Script:ProgramSourceTable = @{
 		Arm64Uri         = { param($version) "" }
 	}
 	"Jellyfin" = @{
-		GithubOwner      = ""
-		GithubRepo       = ""
+		GithubOwner      = "jellyfin"
+		GithubRepo       = "jellyfin"
 		SourceForgeProj  = ""
 		Amd64Uri         = { param($version) "https://repo.jellyfin.org/files/server/windows/stable/v${version}/amd64/jellyfin_${version}-amd64.zip" }
 		Arm64Uri         = { param($version) "https://repo.jellyfin.org/files/server/windows/stable/v${version}/arm64/jellyfin_${version}-arm64.zip" }

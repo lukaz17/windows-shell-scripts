@@ -22,41 +22,34 @@
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
-Set-PSDebug -Trace 2
 
 # Application info
-$GITHUB_OWNER = "jellyfin"
-$GITHUB_REPO = "jellyfin"
 $PROGRAM_ID = "Jellyfin"
-$PROGRAM_EXEC = "jellyfin.exe"
 
 # Shared library
 . "${PSScriptRoot}\shared\install-common.ps1"
+. "${PSScriptRoot}\shared\install-source.ps1"
 
 # Prepare environment
-$INSTALL_VERSION = ""
-if (${args}.Count -ge 1) {
-	$INSTALL_VERSION = ${args}[0].ToString()
-}
-$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "${GITHUB_OWNER}" -Repo "${GITHUB_REPO}" -FallbackVersion "${INSTALL_VERSION}"
+$InstallArgs = Get-InstallArgument -Arguments ${args}
+$InstallSrc = Get-InstallSource -ProgramId "${PROGRAM_ID}"
+$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "$($InstallArgs.Version)"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}"
 
 # Download and install binaries
 if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
-	$BIN_ARCH_URI_AMD64 = "https://repo.jellyfin.org/files/server/windows/stable/v${INSTALL_VERSION}/amd64/jellyfin_${INSTALL_VERSION}-amd64.zip"
-	$BIN_ARCH_URI_ARM64 = "https://repo.jellyfin.org/files/server/windows/stable/v${INSTALL_VERSION}/arm64/jellyfin_${INSTALL_VERSION}-arm64.zip"
+	$BIN_ARCH_URI_AMD64 = Get-Amd64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
+	$BIN_ARCH_URI_ARM64 = Get-Arm64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
 	$BIN_ARCH_TMP_FILE = "$($InstallEnv.TempTarget).zip"
 	Download-UriPerArch -Amd64Uri "${BIN_ARCH_URI_AMD64}" -Arm64Uri "${BIN_ARCH_URI_ARM64}" -OutputPath "${BIN_ARCH_TMP_FILE}"
-	New-Directory2 "$($InstallEnv.TempTarget)"
+	New-Directory2 -Path "$($InstallEnv.TempTarget)"
 	Extract-Archive -ArchivePath "${BIN_ARCH_TMP_FILE}" -DestinationPath "$($InstallEnv.TempTarget)" -ScriptRoot "${PSScriptRoot}"
-	Remove-Item2 "${BIN_ARCH_TMP_FILE}"
-	$TEMP_TARGET_FINAL = $([IO.Path]::Combine("$($InstallEnv.TempTarget)", "jellyfin"))
-	Move-Item2 -From "${TEMP_TARGET_FINAL}" -To "$($InstallEnv.InstallTarget)"
-	Remove-Item2 "$($InstallEnv.TempTarget)"
+	Remove-Item2 -Path "${BIN_ARCH_TMP_FILE}"
+	Move-Item2 -From "$($InstallEnv.TempTarget)\jellyfin" -To "$($InstallEnv.InstallTarget)"
+	Remove-Item2 -Path "$($InstallEnv.TempTarget)"
 }
 
 # Finalize install
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
 Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
-
-Set-PSDebug -Trace 0
+Finalize-Install
