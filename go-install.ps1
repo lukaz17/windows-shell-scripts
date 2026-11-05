@@ -12,8 +12,8 @@
 #
 #  Example:
 #    go-install
-#    go-install 1.27.12
-#    go-install v1.27.12
+#    go-install 1.27.1
+#    go-install v1.27.1
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -44,9 +44,9 @@ function Get-InstallVersionFromGoDev {
 		$version = ${FallbackVersion}
 	}
 
-	$version = ${version}.TrimStart("go")
+	$version = Normalize-InstallVersion -Version "${version}" -TagPrefix "go"
 	Write-Host "> Latest Version:  ${version}"
-	return Normalize-InstallVersion -Version "${version}"
+	return ${version}
 }
 
 # Prepare environment
@@ -71,9 +71,10 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 }
 
 # Finalize install
+$GOPATH_TARGET = "$($InstallEnv.UserProfileData)\.${PROGRAM_ID}"
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
 Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)\bin" -IsSystemWide $($InstallEnv.IsAdmin)
-Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)\cache\bin" -IsSystemWide $($InstallEnv.IsAdmin)
+Update-CliinstPath -BinPath "${GOPATH_TARGET}\bin" -IsSystemWide $false
 Set-EnvVariable -Name "GOROOT" -Value "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
-Set-EnvVariable -Name "GOPATH" -Value "$($InstallEnv.ActiveTarget)\cache" -IsSystemWide $($InstallEnv.IsAdmin)
+Set-EnvVariable -Name "GOPATH" -Value "${GOPATH_TARGET}" -IsSystemWide $false
 Finalize-Install
