@@ -53,9 +53,11 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 }
 
 # Finalize install
+$UV_USER_TARGET = "$($InstallEnv.UserProfileData)\.${PROGRAM_ID}"
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
 Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
+Update-CliinstPath -BinPath "${env:USERPROFILE}\.local\bin" -IsSystemWide $false
 Set-EnvVariable -Name "UV_INSTALL_DIR" -Value "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
-Set-EnvVariable -Name "UV_PYTHON_INSTALL_DIR" -Value "$($InstallEnv.InstallRoot)\Python" -IsSystemWide $($InstallEnv.IsAdmin)
-Set-EnvVariable -Name "UV_TOOL_DIR" -Value "$($InstallEnv.InstallRoot)\Tool" -IsSystemWide $($InstallEnv.IsAdmin)
+Set-EnvVariable -Name "UV_PYTHON_INSTALL_DIR" -Value "${UV_USER_TARGET}\Python" -IsSystemWide $false
+Set-EnvVariable -Name "UV_TOOL_DIR" -Value "${UV_USER_TARGET}\Tool" -IsSystemWide $false
 Finalize-Install
