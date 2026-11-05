@@ -184,12 +184,23 @@ function Get-InstallVersionFromGithub {
 	param(
 		[Parameter(Mandatory)] [string] $Owner,
 		[Parameter(Mandatory)] [string] $Repo,
+		[string] $FallbackVersion = "",
 		[string] $TagPrefix = "",
-		[string] $FallbackVersion = ""
+		[string] $TagFilter = ""
 	)
 
 	if ("${FallbackVersion}" -eq "") {
-		$version = (Invoke-WebRequest -UseBasicParsing "https://api.github.com/repos/${Owner}/${Repo}/releases/latest" | ConvertFrom-Json).tag_name
+		if ("${TagFilter}" -ne "") {
+			$releases = Invoke-WebRequest -UseBasicParsing "https://api.github.com/repos/${Owner}/${Repo}/releases?per_page=100" | ConvertFrom-Json
+			$release = ${releases} | Where-Object { $_.tag_name.StartsWith(${TagFilter}) } | Select-Object -First 1
+			if ($null -eq ${release}) {
+				Write-Output "Get-InstallVersionFromGithub: No release found for tag filter ${TagFilter}"
+				exit 1
+			}
+			$version = $($release.tag_name)
+		} else {
+			$version = (Invoke-WebRequest -UseBasicParsing "https://api.github.com/repos/${Owner}/${Repo}/releases/latest" | ConvertFrom-Json).tag_name
+		}
 	} else {
 		$version = ${FallbackVersion}
 	}
