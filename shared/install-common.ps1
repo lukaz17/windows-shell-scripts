@@ -118,6 +118,28 @@ function Download-Uri {
 }
 
 # ------------------------------------------------------------------------------
+# Parse arguments for the install scripts.
+# ------------------------------------------------------------------------------
+function Get-InstallArgument {
+	param(
+		[Parameter()] [object[]] $Arguments = @()
+	)
+
+	$defaultFlag = "--default"
+	$versionArguments = @(${Arguments} | Where-Object { "$_" -ne "${defaultFlag}" })
+	if (${versionArguments}.Count -gt 1) {
+		Write-Output "Get-InstallArgument: Expected <version> [${defaultFlag}], got: ${Arguments}"
+		exit 1
+	}
+
+	# PowerShell parses 24.10 as a number: a cast keeps the typed text, ToString() returns 24.1
+	return @{
+		Version = if (${versionArguments}.Count -eq 1) { [string]${versionArguments}[0] } else { "" }
+		IsDefault = ${Arguments} -contains "${defaultFlag}"
+	}
+}
+
+# ------------------------------------------------------------------------------
 # Normalize install version for consistency.
 # ------------------------------------------------------------------------------
 function Normalize-InstallVersion {
@@ -248,7 +270,8 @@ function Initialize-InstallEnv {
 
 	$installTarget = "${installRoot}\${ProgramId}-v${Version}"
 	$activeSuffix = if ("${ActiveTag}" -ne "") { "-${ActiveTag}" } else { "" }
-	$activeTarget  = "${installRoot}\active-release${activeSuffix}"
+	$defaultTarget = "${installRoot}\active-release"
+	$activeTarget  = "${defaultTarget}${activeSuffix}"
 	$tempTarget  = "${tempRoot}\${ProgramId}-v${Version}"
 
 	New-Directory2 -Path "${installRoot}"
@@ -267,6 +290,7 @@ function Initialize-InstallEnv {
 		TempRoot = ${tempRoot}
 		UserProfileData = ${userProfileData}
 		InstallTarget = ${installTarget}
+		DefaultTarget = ${defaultTarget}
 		ActiveTarget = ${activeTarget}
 		TempTarget = ${tempTarget}
 	}
