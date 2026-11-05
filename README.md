@@ -91,3 +91,7 @@ cliinst-install -UsrLocalShare "D:\Bin" -Tmp "E:\Workspace-CliInst"
 ## License
 
 Windows Shell Scripts is licensed under the MIT license. See LICENSE file for more details.
+
+### 7-Zip
+
+The 7-Zip 25.01 binaries in `7z-amd64` and `7z-arm64` are third-party software and are not covered by the MIT license. See the `License.txt` file in each folder for their license. Their [source code](https://www.7-zip.org/a/7z2501-src.7z) is available from the 7-Zip website.

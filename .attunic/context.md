@@ -49,16 +49,21 @@ When the list is not empty and a top-level file/folder is missing from it, promp
 ├── .attunic/                 # project AI agent memory (context, memory, question)
 ├── 7z-amd64/                 # bundled 7-Zip CLI for AMD64
 │   ├── 7z.dll
-│   └── 7z.exe
+│   ├── 7z.exe
+│   └── License.txt
 ├── 7z-arm64/                 # bundled 7-Zip CLI for ARM64
 │   ├── 7z.dll
-│   └── 7z.exe
+│   ├── 7z.exe
+│   └── License.txt
 ├── shared/                   # support libraries dot-sourced by top-level scripts
 │   ├── install-common.ps1    # installer script shared functions: safe file ops, install env initialization, extraction, shortcuts, PATH, finalization
 │   └── install-source.ps1    # installer script download sources and version lookup
 ├── .copier-answers.yml       # project Copier answers
 ├── .editorconfig             # editor formatting rules
 ├── .gitignore                # git ignore patterns
+├── AGENTS.md                 # AI agent entry point: core rules, topic index
+├── CLAUDE.md                 # Claude Code entry point, imports AGENTS.md
+├── LICENSE                   # MIT license
 ├── README.md                 # project README
 ├── cliinst-install.ps1       # configure initial CliInst settings (env vars, CLIINST_PATH)
 ├── cliinst-update.ps1        # update this repository via git pull
