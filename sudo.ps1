@@ -10,6 +10,7 @@
 #  Example:
 #    sudo notepad
 #    sudo cmd /c whoami
+#    sudo go-install 1.27.1
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -40,8 +41,12 @@ if (${isAdmin}) {
 		& $args[0]
 	}
 } else {
-	if ($args.Count -gt 1) {
-		$subArgs = $args[1..($args.Count - 1)] | ForEach-Object { Quote-Arg $_ }
+	$subArgs = @($args | Select-Object -Skip 1 | ForEach-Object { Quote-Arg $_ })
+	$command = Get-Command $args[0] -ErrorAction SilentlyContinue
+	if (${command} -and ${command}.CommandType -eq "ExternalScript") {
+		$scriptArgs = @("-File", (Quote-Arg ${command}.Source)) + ${subArgs}
+		Start-Process powershell -Verb RunAs -ArgumentList ${scriptArgs} -Wait
+	} elseif (${subArgs}.Count -gt 0) {
 		Start-Process $args[0] -Verb RunAs -ArgumentList ${subArgs} -Wait
 	} else {
 		Start-Process $args[0] -Verb RunAs -Wait
