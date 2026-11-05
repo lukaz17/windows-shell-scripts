@@ -182,6 +182,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/qdrant/qdrant/releases/download/v${version}/qdrant-x86_64-pc-windows-msvc.zip" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"rustup" = @{
+		GithubOwner      = "rust-lang"
+		GithubRepo       = "rustup"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://static.rust-lang.org/rustup/archive/${version}/x86_64-pc-windows-msvc/rustup-init.exe" }
+		Arm64Uri         = { param($version) "https://static.rust-lang.org/rustup/archive/${version}/aarch64-pc-windows-msvc/rustup-init.exe" }
+	}
 	"Sass" = @{
 		GithubOwner      = "sass"
 		GithubRepo       = "dart-sass"
