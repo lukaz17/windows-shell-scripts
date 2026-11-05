@@ -262,12 +262,12 @@ $Script:ProgramSourceTable = @{
 }
 
 $Script:ProgramUriTable = @{
-    "Unikey" = @{
-        "4.6-rc2" = @{
+	"Unikey" = @{
+		"4.6-rc2" = @{
 			Amd64Uri = "https://sourceforge.net/projects/unikey/files/unikey-win/4.6%20RC2/unikey46RC2-230919-win64.zip/download"
 			Arm64Uri = ""
 		}
-        "4.6-rc1" = @{
+		"4.6-rc1" = @{
 			Amd64Uri = "https://sourceforge.net/projects/unikey/files/unikey-win/4.6%20RC1/unikey46RC1-230912-win64.zip/download"
 			Arm64Uri = ""
 		}
@@ -325,7 +325,7 @@ function Get-Amd64Uri {
 }
 
 # ------------------------------------------------------------------------------
-# Return the download URI for AMD64 for a Program ID.
+# Return the download URI for ARM64 for a Program ID.
 # ------------------------------------------------------------------------------
 function Get-Arm64Uri {
 	param(
