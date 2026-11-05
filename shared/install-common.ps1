@@ -186,9 +186,13 @@ function Initialize-InstallEnv {
 		$startMenuRoot = [IO.Path]::Combine(${env:USERPROFILE}, "Start Menu", "Apps")
 	}
 	$tempRoot = ${env:TEMP}
+	$userProfileData = [IO.Path]::Combine(${env:USERPROFILE}, ".local")
 
 	if ("${env:CLIINST_USR_LOCAL_SHARE}" -ne "") {
 		$installRoot = [IO.Path]::Combine(${env:CLIINST_USR_LOCAL_SHARE}, ${ProgramId})
+	}
+	if ("${env:CLIINST_USR_PROFILE}" -ne "") {
+		$userProfileData = "${env:CLIINST_USR_PROFILE}"
 	}
 	if ("${env:CLIINST_TEMP}" -ne "") {
 		$tempRoot = "${env:CLIINST_TEMP}"
@@ -201,6 +205,7 @@ function Initialize-InstallEnv {
 
 	New-Directory2 "${installRoot}"
 	New-Directory2 "${tempRoot}"
+	New-Directory2 "${userProfileData}"
 	if (${IsApplication}) {
 		New-Directory2 "${startMenuRoot}"
 	}
@@ -212,6 +217,7 @@ function Initialize-InstallEnv {
 		DesktopRoot = ${desktopRoot}
 		StartMenuRoot = ${startMenuRoot}
 		TempRoot = ${tempRoot}
+		UserProfileData = ${userProfileData}
 		InstallTarget = ${installTarget}
 		ActiveTarget = ${activeTarget}
 		TempTarget = ${tempTarget}
@@ -346,21 +352,18 @@ function Remove-EnvVariable {
 }
 
 # ------------------------------------------------------------------------------
-# Prepend CLIINST_PATH to the system PATH environment variable.
+# Prepend %CLIINST_PATH% (Machine) or %CLIINST_USR_PATH% (User) to PATH.
+# Uses the registry, as [Environment] would expand PATH and write it as REG_SZ.
 # ------------------------------------------------------------------------------
 function Install-CliinstPath {
 	param(
 		[Parameter()] [bool] $IsSystemWide = $false
 	)
 
-	$scope = if (${IsSystemWide}) { "Machine" } else { "User" }
-	$currentPath = [Environment]::GetEnvironmentVariable("PATH", ${scope})
+	$envTag = if (${IsSystemWide}) { "%CLIINST_PATH%" } else { "%CLIINST_USR_PATH%" }
+	$regPath = if (${IsSystemWide}) { "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" } else { "HKCU:\Environment" }
+	$currentPath = (Get-Item -Path "${regPath}").GetValue("Path", "", "DoNotExpandEnvironmentNames")
 
-	if ($null -eq ${currentPath} -or ${currentPath} -eq "") {
-		$currentPath = ""
-	}
-
-	$envTag = "%CLIINST_PATH%"
 	$entries = ${currentPath}.Split(";")
 	foreach ($entry in ${entries}) {
 		if (${entry}.Trim().ToLower() -eq ${envTag}.ToLower()) {
@@ -369,15 +372,11 @@ function Install-CliinstPath {
 	}
 
 	$newPath = "${envTag};${currentPath}"
-	[Environment]::SetEnvironmentVariable("PATH", ${newPath}, ${scope})
+	Set-ItemProperty -Path "${regPath}" -Name "Path" -Value "${newPath}" -Type ExpandString
 }
 
 # ------------------------------------------------------------------------------
-# Appends a bin path to the CLIINST_PATH environment variable, deduplicates
-# and sorts the entries, then persists the value at Machine scope (system-wide)
-# or User scope (per-user).
-# Uses a temp file (CLIINST_PATH_MACHINE.txt or CLIINST_PATH_USER.txt) as an
-# intermediary cache to read/write the path list.
+# Append a bin path to CLIINST_PATH (Machine) or CLIINST_USR_PATH (User).
 # ------------------------------------------------------------------------------
 function Update-CliinstPath {
 	param(
@@ -386,21 +385,10 @@ function Update-CliinstPath {
 	)
 
 	Write-Host "> Add Path:     ${BinPath}"
-	$fileName = if (${IsSystemWide}) { "CLIINST_PATH_MACHINE.txt" } else { "CLIINST_PATH_USER.txt" }
-	$tempDir = if ("${env:CLIINST_TEMP}" -ne "") { "${env:CLIINST_TEMP}" } else { ${env:TEMP} }
-	$filePath = [IO.Path]::Combine(${tempDir}, ${fileName})
-	if (-not (Test-Path ${filePath})) {
-		$envValue = ${env:CLIINST_PATH}
-		if ($null -ne ${envValue}) {
-			Set-Content -Path ${filePath} -Value ${envValue} -Encoding UTF8
-		}
-	}
-
-	$cliinstPath = if (Test-Path ${filePath}) { Get-Content -Path ${filePath} -Raw } else { $null }
-	if ($null -ne ${cliinstPath}) {
-		$cliinstPath = $cliinstPath.Trim()
-	}
-	if ($null -eq ${cliinstPath} -or ${cliinstPath} -eq "") {
+	$envName = if (${IsSystemWide}) { "CLIINST_PATH" } else { "CLIINST_USR_PATH" }
+	$scope = if (${IsSystemWide}) { "Machine" } else { "User" }
+	$cliinstPath = [Environment]::GetEnvironmentVariable(${envName}, ${scope})
+	if ("${cliinstPath}".Trim() -eq "") {
 		$cliinstPath = ${BinPath}
 	} else {
 		$paths = ${cliinstPath}.Split(";")
@@ -412,8 +400,8 @@ function Update-CliinstPath {
 		$cliinstPath = $cliinstPath.Trim(";")
 	}
 
-	Set-EnvVariable "CLIINST_PATH" ${cliinstPath} ${IsSystemWide}
-	Set-Content -Path "${filePath}" -Value "${cliinstPath}" -Encoding UTF8
+	Install-CliinstPath -IsSystemWide ${IsSystemWide}
+	Set-EnvVariable ${envName} ${cliinstPath} ${IsSystemWide}
 }
 
 # ------------------------------------------------------------------------------
