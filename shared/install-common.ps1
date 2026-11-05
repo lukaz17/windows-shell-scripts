@@ -141,6 +141,43 @@ function Normalize-InstallVersion {
 }
 
 # ------------------------------------------------------------------------------
+# Get string represent the version that is suitable for sorting using bare string.
+# ------------------------------------------------------------------------------
+function Get-VersionSortKey {
+	param(
+		[Parameter(Mandatory)] [AllowEmptyString()] [string] $Version
+	)
+
+	# "!" sorts below ".", so a Go pre-release (1.27rc1) precedes its release (1.27.0)
+	$marked = ${Version} -replace "(beta|rc)", "!`$1"
+	return [regex]::Replace(${marked}, "\d+", { param($number) ${number}.Value.PadLeft(20, "0") })
+}
+
+# ------------------------------------------------------------------------------
+# Check that the first version is not older than the second
+# ------------------------------------------------------------------------------
+function Test-VersionAtLeast {
+	param(
+		[Parameter(Mandatory)] [AllowEmptyString()] [string] $Version,
+		[Parameter(Mandatory)] [string] $Anchor
+	)
+
+	return [string]::CompareOrdinal((Get-VersionSortKey -Version "${Version}"), (Get-VersionSortKey -Version "${Anchor}")) -ge 0
+}
+
+# ------------------------------------------------------------------------------
+# Check that the first version is not newer than the second
+# ------------------------------------------------------------------------------
+function Test-VersionAtMost {
+	param(
+		[Parameter(Mandatory)] [AllowEmptyString()] [string] $Version,
+		[Parameter(Mandatory)] [string] $Anchor
+	)
+
+	return [string]::CompareOrdinal((Get-VersionSortKey -Version "${Version}"), (Get-VersionSortKey -Version "${Anchor}")) -le 0
+}
+
+# ------------------------------------------------------------------------------
 # Get latest version from GitHub
 # ------------------------------------------------------------------------------
 function Get-InstallVersionFromGithub {
