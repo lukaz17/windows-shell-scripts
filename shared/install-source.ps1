@@ -22,8 +22,8 @@ $Script:ProgramSourceTable = @{
 		Arm64Uri         = { param($version) "https://github.com/ip7z/7zip/releases/download/${version}/7z$(${version}.Replace('.',''))-arm64.exe" }
 	}
 	"Bifrost HTTP" = @{
-		GithubOwner      = ""
-		GithubRepo       = ""
+		GithubOwner      = "maximhq"
+		GithubRepo       = "bifrost"
 		SourceForgeProj  = ""
 		Amd64Uri         = { param($version) "https://downloads.getmaxim.ai/bifrost/v${version}/windows/amd64/bifrost-http.exe" }
 		Arm64Uri         = { param($version) "" }

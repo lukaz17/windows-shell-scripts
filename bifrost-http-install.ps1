@@ -3,15 +3,17 @@
 #  bifrost-http-install
 #
 #  Install/Update Bifrost LLM Gateway for current user. This also works as a version manager.
+#  If version is not specified, the latest version will be installed.
 #
 #  Homepage: https://www.getmaxim.ai/bifrost
 #
 #  Usage:
-#    bifrost-http-install <version>
+#    bifrost-http-install [<version>]
 #
 #  Example:
-#    bifrost-http-install 1.7.1
-#    bifrost-http-install v1.7.1
+#    bifrost-http-install
+#    bifrost-http-install 2.7.0
+#    bifrost-http-install v2.7.0
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -20,39 +22,37 @@
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
-Set-PSDebug -Trace 2
 
 # Application info
-$GITHUB_OWNER = "maximhq"
-$GITHUB_REPO = "bifrost"
 $PROGRAM_ID = "Bifrost HTTP"
 $PROGRAM_EXEC = "bifrost-http.exe"
 
 # Shared library
 . "${PSScriptRoot}\shared\install-common.ps1"
+. "${PSScriptRoot}\shared\install-source.ps1"
 
 # Prepare environment
 $INSTALL_VERSION = ""
 if (${args}.Count -ge 1) {
 	$INSTALL_VERSION = ${args}[0].ToString()
 }
-$INSTALL_VERSION = Normalize-InstallVersion "${INSTALL_VERSION}"
+$InstallSrc = Get-InstallSource -ProgramId "${PROGRAM_ID}"
+$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "${INSTALL_VERSION}" -TagPrefix "transports/v" -TagFilter "transports/v"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}"
 
 # Download and install binaries
 if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
-	$BIN_URI_AMD64 = "https://downloads.getmaxim.ai/bifrost/v${INSTALL_VERSION}/windows/amd64/bifrost-http.exe"
-	$BIN_URI_ARM64 = ""
+	$BIN_URI_AMD64 = Get-Amd64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
+	$BIN_URI_ARM64 = Get-Arm64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
 	$BIN_TMP_FILE = "$($InstallEnv.TempTarget).exe"
 	Download-UriPerArch -Amd64Uri "${BIN_URI_AMD64}" -Arm64Uri "${BIN_URI_ARM64}" -OutputPath "${BIN_TMP_FILE}"
-	New-Directory2 "$($InstallEnv.TempTarget)"
-	Move-Item2 -From "${BIN_TMP_FILE}" -To ([IO.Path]::Combine($($InstallEnv.TempTarget), ${PROGRAM_EXEC}))
-	Move-Item2 -From "$([IO.Path]::Combine($($InstallEnv.TempTarget)))" -To "$($InstallEnv.InstallTarget)"
-	Remove-Item2 "$($InstallEnv.TempTarget)"
+	New-Directory2 -Path "$($InstallEnv.TempTarget)"
+	Move-Item2 -From "${BIN_TMP_FILE}" -To "$($InstallEnv.TempTarget)\${PROGRAM_EXEC}"
+	Move-Item2 -From "$($InstallEnv.TempTarget)" -To "$($InstallEnv.InstallTarget)"
+	Remove-Item2 -Path "$($InstallEnv.TempTarget)"
 }
 
 # Finalize install
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
 Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
-
-Set-PSDebug -Trace 0
+Finalize-Install
