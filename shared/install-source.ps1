@@ -53,8 +53,8 @@ $Script:ProgramSourceTable = @{
 		GithubOwner      = "Rem0o"
 		GithubRepo       = "FanControl.Releases"
 		SourceForgeProj  = ""
-		Amd64Uri         = { param($version) "https://github.com/Rem0o/FanControl.Releases/releases/download/V${version}/FanControl_${version}_net_10_0.zip" }
-		Arm64Uri         = { param($version) "https://github.com/Rem0o/FanControl.Releases/releases/download/V${version}/FanControl_${version}_net_10_0.zip" }
+		Amd64Uri         = { param($version) Get-FanControlUri -Version "${version}" }
+		Arm64Uri         = { param($version) Get-FanControlUri -Version "${version}" }
 	}
 	"FFmpeg" = @{
 		GithubOwner      = "GyanD"
@@ -286,6 +286,35 @@ $Script:ProgramUriTable = @{
 			Arm64Uri = ""
 		}
 	}
+}
+
+# ------------------------------------------------------------------------------
+# Return FanControl binaries download URL.
+# ------------------------------------------------------------------------------
+function Get-FanControlUri {
+	param(
+		[Parameter(Mandatory)] [string] $Version
+	)
+
+	if (Test-VersionAtLeast -Version "${Version}" -Anchor "248") {
+		$asset = "FanControl_${Version}_net_10_0.zip"
+	} elseif (Test-VersionAtLeast -Version "${Version}" -Anchor "183") {
+		$asset = "FanControl_${Version}_net_8_0.zip"
+	} elseif (Test-VersionAtLeast -Version "${Version}" -Anchor "174") {
+		$asset = "FanControl_net_8_0.zip"
+	} elseif (Test-VersionAtLeast -Version "${Version}" -Anchor "137") {
+		$asset = "FanControl_net_7_0.zip"
+	} elseif (Test-VersionAtLeast -Version "${Version}" -Anchor "134") {
+		$asset = "FanControl_net6.zip"
+	} elseif (Test-VersionAtLeast -Version "${Version}" -Anchor "131") {
+		$asset = "FanControlnet60.zip"
+	} elseif (Test-VersionAtLeast -Version "${Version}" -Anchor "128") {
+		$asset = "FanControl-net6.0.zip"
+	} else {
+		$asset = "FanControl.zip"
+	}
+
+	return "https://github.com/Rem0o/FanControl.Releases/releases/download/V${Version}/${asset}"
 }
 
 # ------------------------------------------------------------------------------

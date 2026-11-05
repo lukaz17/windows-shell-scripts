@@ -24,9 +24,9 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 # Application info
-$PROGRAM_ID="FanControl"
-$PROGRAM_NAME="FanControl"
-$PROGRAM_EXEC="FanControl.exe"
+$PROGRAM_ID = "FanControl"
+$PROGRAM_NAME = "FanControl"
+$PROGRAM_EXEC = "FanControl.exe"
 
 # Shared library
 . "${PSScriptRoot}\shared\install-common.ps1"
@@ -37,7 +37,7 @@ $INSTALL_VERSION = ""
 if (${args}.Count -ge 1) {
 	$INSTALL_VERSION = ${args}[0].ToString()
 }
-$InstallSrc = Get-InstallSource "${PROGRAM_ID}"
+$InstallSrc = Get-InstallSource -ProgramId "${PROGRAM_ID}"
 $INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "${INSTALL_VERSION}" -TagPrefix "V"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}" -IsApplication
 
@@ -47,17 +47,16 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 	$BIN_ARCH_URI_ARM64 = Get-Arm64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
 	$BIN_ARCH_TMP_FILE = "$($InstallEnv.TempTarget).zip"
 	Download-UriPerArch -Amd64Uri "${BIN_ARCH_URI_AMD64}" -Arm64Uri "${BIN_ARCH_URI_ARM64}" -OutputPath "${BIN_ARCH_TMP_FILE}"
-	New-Directory2 "$($InstallEnv.TempTarget)"
+	New-Directory2 -Path "$($InstallEnv.TempTarget)"
 	Extract-Archive -ArchivePath "${BIN_ARCH_TMP_FILE}" -DestinationPath "$($InstallEnv.TempTarget)" -ScriptRoot "${PSScriptRoot}"
-	Remove-Item2 "${BIN_ARCH_TMP_FILE}"
-	$TEMP_TARGET_FINAL = $([IO.Path]::Combine("$($InstallEnv.TempTarget)"))
-	Move-Item2 -From "${TEMP_TARGET_FINAL}" -To "$($InstallEnv.InstallTarget)"
-	Remove-Item2 "$($InstallEnv.TempTarget)"
+	Remove-Item2 -Path "${BIN_ARCH_TMP_FILE}"
+	Move-Item2 -From "$($InstallEnv.TempTarget)" -To "$($InstallEnv.InstallTarget)"
+	Remove-Item2 -Path "$($InstallEnv.TempTarget)"
 }
 
 # Finalize install
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
-$TARGET_EXE=[IO.Path]::Combine($($InstallEnv.ActiveTarget), ${PROGRAM_EXEC})
+$TARGET_EXE = "$($InstallEnv.ActiveTarget)\${PROGRAM_EXEC}"
 New-AppShortcut -ProgramName "${PROGRAM_NAME}" -TargetExe "${TARGET_EXE}" -WorkingDir "$($InstallEnv.ActiveTarget)" -Destination "$($InstallEnv.DesktopRoot)"
 New-AppShortcut -ProgramName "${PROGRAM_NAME}" -TargetExe "${TARGET_EXE}" -WorkingDir "$($InstallEnv.ActiveTarget)" -Destination "$($InstallEnv.StartMenuRoot)"
 Finalize-Install
