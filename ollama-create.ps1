@@ -6,13 +6,14 @@
 #  The script won't handle input validations and delegate it to Ollama.
 #
 #  Usage:
-#    ollama-create -Model <model:tag> [-ContextSize <KB>] [-RepeatPenalty <float>] [-Temperature <float>] [-TopK <int>] [-TopP <float>] [-MinP <float>] [-BaseModel <model:tag>] [-KVCache <fp16/f16/q8_0/q4_0>] [-Verify <0/1>]
+#    ollama-create -Model <model:tag> [-ContextSize <KB>] [-RepeatPenalty <float>] [-Temperature <float>] [-TopK <int>] [-TopP <float>] [-MinP <float>] [-BaseModel <model:tag>] [-KVCache <fp16/f16/q8_0/q4_0>] [-Verify <0/1>] [-HostUrl <url>]
 #
 #  Example:
 #    ollama-create qwen3.6:27b-q8_0 -ContextSize 256
 #    ollama-create qwen3.6:27b-q8_0 qwen3.6:27b-q8_0 256
 #    ollama-create qwen3.6:27b-q8_0 -ContextSize 256 -Verify 1
 #    ollama-create -Model qwen3.6:27b-q8_0 -ContextSize 256 -Temperature 0.7 -TopK 40 -TopP 0.9 -MinP 0.05 -RepeatPenalty 1.1
+#    ollama-create -Model qwen3.6:27b-q8_0 -ContextSize 256 -HostUrl http://ollama.local
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -55,6 +56,9 @@ param(
 	[string]$HostUrl
 )
 
+$ErrorActionPreference = "Stop"
+Set-StrictMode -Version Latest
+
 $NEW_MODEL = "${Model}"
 $BASE_MODEL = "${BaseModel}"
 if ("${BASE_MODEL}" -eq "") {
@@ -77,45 +81,49 @@ if ($HostUrl) {
 	$OLLAMA_HOST = $HostUrl
 }
 
-$mfFile = [IO.Path]::Combine(${env:TEMP}, "ollama_$([System.IO.Path]::GetRandomFileName()).Modelfile")
-$mfContent = "FROM ${BASE_MODEL}"
+$modelfilePath = "${env:TEMP}\ollama_$([System.IO.Path]::GetRandomFileName()).Modelfile"
+$modelfileContent = "FROM ${BASE_MODEL}"
 if ($PSBoundParameters.ContainsKey('ContextSize')) {
-	$mfContent += "`nPARAMETER num_ctx $(${CONTEXT_LENGTH_KB} * 1024)"
+	$modelfileContent += "`nPARAMETER num_ctx $(${CONTEXT_LENGTH_KB} * 1024)"
 }
 if ($PSBoundParameters.ContainsKey('Temperature')) {
-	$mfContent += "`nPARAMETER temperature ${TEMPERATURE}"
+	$modelfileContent += "`nPARAMETER temperature ${TEMPERATURE}"
 }
 if ($PSBoundParameters.ContainsKey('TopK')) {
-	$mfContent += "`nPARAMETER top_k ${TOP_K}"
+	$modelfileContent += "`nPARAMETER top_k ${TOP_K}"
 }
 if ($PSBoundParameters.ContainsKey('TopP')) {
-	$mfContent += "`nPARAMETER top_p ${TOP_P}"
+	$modelfileContent += "`nPARAMETER top_p ${TOP_P}"
 }
 if ($PSBoundParameters.ContainsKey('RepeatPenalty')) {
-	$mfContent += "`nPARAMETER repeat_penalty ${REPEAT_PENALTY}"
+	$modelfileContent += "`nPARAMETER repeat_penalty ${REPEAT_PENALTY}"
 }
 if ($PSBoundParameters.ContainsKey('MinP')) {
-	$mfContent += "`nPARAMETER min_p ${MIN_P}"
+	$modelfileContent += "`nPARAMETER min_p ${MIN_P}"
 }
 if ($PSBoundParameters.ContainsKey('KVCache')) {
-	$mfContent += "`nPARAMETER kv_cache ${KV_CACHE}"
+	$modelfileContent += "`nPARAMETER kv_cache ${KV_CACHE}"
 }
-Set-Content -Path ${mfFile} -Value ${mfContent} -Encoding UTF8
+Set-Content -Path ${modelfilePath} -Value ${modelfileContent} -Encoding UTF8
 
+$previousHost = $env:OLLAMA_HOST
 try {
+	# CLI takes its server only from OLLAMA_HOST
+	$env:OLLAMA_HOST = "${OLLAMA_HOST}"
 	Write-Host "> Creating new model: ${NEW_MODEL}"
-	ollama create ${NEW_MODEL} -f ${mfFile}
+	ollama create ${NEW_MODEL} -f ${modelfilePath}
 	if ($LASTEXITCODE -ne 0) {
-		throw "ollama create failed with exit code $LASTEXITCODE"
+		throw "ollama create failed with exit code ${LASTEXITCODE}"
 	}
 
 	if ($LOAD_N_VERIFY) {
-		& "$PSScriptRoot\ollama-info.ps1" -Model $Model -HostUrl $OLLAMA_HOST
+		& "${PSScriptRoot}\ollama-info.ps1" -Model ${Model} -HostUrl ${OLLAMA_HOST}
 	} else {
 		Write-Host "> Success."
 		Start-Sleep -Seconds 1
 	}
 } finally {
-	Remove-Item -Path ${mfFile} -ErrorAction SilentlyContinue
+	$env:OLLAMA_HOST = $previousHost
+	Remove-Item -Path ${modelfilePath} -ErrorAction SilentlyContinue
 }
 Write-Host ""
