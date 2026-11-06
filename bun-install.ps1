@@ -31,12 +31,9 @@ $PROGRAM_ID = "Bun"
 . "${PSScriptRoot}\shared\install-source.ps1"
 
 # Prepare environment
-$INSTALL_VERSION = ""
-if (${args}.Count -ge 1) {
-	$INSTALL_VERSION = ${args}[0].ToString()
-}
+$InstallArgs = Get-InstallArgument -Arguments ${args}
 $InstallSrc = Get-InstallSource -ProgramId "${PROGRAM_ID}"
-$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "${INSTALL_VERSION}" -TagPrefix "bun-"
+$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "$($InstallArgs.Version)" -TagPrefix "bun-"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}"
 
 # Download and install binaries
@@ -48,7 +45,7 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 	New-Directory2 -Path "$($InstallEnv.TempTarget)"
 	Extract-Archive -ArchivePath "${BIN_ARCH_TMP_FILE}" -DestinationPath "$($InstallEnv.TempTarget)" -ScriptRoot "${PSScriptRoot}"
 	Remove-Item2 -Path "${BIN_ARCH_TMP_FILE}"
-	Move-ItemPerArch -Amd64Path "$([IO.Path]::Combine("$($InstallEnv.TempTarget)", "bun-windows-x64"))" -Arm64Path "$([IO.Path]::Combine("$($InstallEnv.TempTarget)", "bun-windows-aarch64"))" -OutputPath "$($InstallEnv.InstallTarget)"
+	Move-ItemPerArch -Amd64Path "$($InstallEnv.TempTarget)\bun-windows-x64" -Arm64Path "$($InstallEnv.TempTarget)\bun-windows-aarch64" -OutputPath "$($InstallEnv.InstallTarget)"
 	Remove-Item2 -Path "$($InstallEnv.TempTarget)"
 }
 
