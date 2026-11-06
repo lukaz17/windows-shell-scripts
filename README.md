@@ -40,7 +40,15 @@ go-install 1.27.1
 
 These installers cannot look up the latest version, so the version is required: `cpuz-install`, `ffmpeg-install`, `firefox-install`, `hwinfo-install`, `hwmonitor-install`, `mariadb-install`, `postgresql-install`, `thunderbird-install`, and `unikey-install`.
 
-Each version stays in its own `<Program>-v<version>` folder, and `active-release` next to it is the version in use. Run an installer with another version to switch to it. A version already on disk is not downloaded again. `mariadb-install` and `postgresql-install` keep one `active-release-v<major>` per major version.
+Each version stays in its own `<Program>-v<version>` folder, and `active-release` next to it is the version in use. Run an installer with another version to switch to it. A version already on disk is not downloaded again. `mariadb-install`, `nodejs-install`, and `postgresql-install` keep one `active-release-v<major>` per major version.
+
+`mariadb-install`, `nodejs-install`, and `postgresql-install` add nothing to `PATH` unless you pass `--default`, which makes that major version the default. `active-release` then points to its `active-release-v<major>`, so later updates of that major version carry over, and `active-release\bin` goes on `PATH`, or `active-release` itself for `nodejs-install`. Pass `--default` with another major version to switch:
+
+```
+postgresql-install 17.7 --default
+```
+
+`nodejs-install --default` also sets `npm_config_cache` to `.Nodejs\<major>\cache` and `npm_config_prefix` to `.Nodejs\<major>\bin` in the `CLIINST_USR_PROFILE` folder, and points the `.Nodejs\bin` junction on `CLIINST_USR_PATH` to that `bin` folder, so the npm cache and global packages follow the default major version.
 
 Installers support AMD64 and ARM64, and stop with `Unsupported architecture` if a program has no build for your system.
 
