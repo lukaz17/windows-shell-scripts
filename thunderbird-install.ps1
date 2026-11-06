@@ -31,11 +31,8 @@ $PROGRAM_EXEC = "thunderbird.exe"
 . "${PSScriptRoot}\shared\install-source.ps1"
 
 # Prepare environment
-$INSTALL_VERSION = ""
-if (${args}.Count -ge 1) {
-	$INSTALL_VERSION = ${args}[0].ToString()
-}
-$INSTALL_VERSION = Normalize-InstallVersion "${INSTALL_VERSION}"
+$InstallArgs = Get-InstallArgument -Arguments ${args}
+$INSTALL_VERSION = Normalize-InstallVersion -Version "$($InstallArgs.Version)"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}" -IsApplication
 
 # Download and install binaries
@@ -44,22 +41,22 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 	$BIN_ARCH_URI_ARM64 = Get-Arm64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
 	$BIN_ARCH_TMP_FILE = "$($InstallEnv.TempTarget).exe"
 	Download-UriPerArch -Amd64Uri "${BIN_ARCH_URI_AMD64}" -Arm64Uri "${BIN_ARCH_URI_ARM64}" -OutputPath "${BIN_ARCH_TMP_FILE}"
-	New-Directory2 "$($InstallEnv.TempTarget)"
+	New-Directory2 -Path "$($InstallEnv.TempTarget)"
 	Extract-Archive -ArchivePath "${BIN_ARCH_TMP_FILE}" -DestinationPath "$($InstallEnv.TempTarget)" -ScriptRoot "${PSScriptRoot}"
-	Remove-Item2 "${BIN_ARCH_TMP_FILE}"
-	$TEMP_TARGET_FINAL = $([IO.Path]::Combine("$($InstallEnv.TempTarget)", "core"))
-	Remove-Item2 "$([IO.Path]::Combine("${TEMP_TARGET_FINAL}", "maintenanceservice.exe"))"
-	Remove-Item2 "$([IO.Path]::Combine("${TEMP_TARGET_FINAL}", "maintenanceservice_installer.exe"))"
-	Remove-Item2 "$([IO.Path]::Combine("${TEMP_TARGET_FINAL}", "updater.exe"))"
-	Remove-Item2 "$([IO.Path]::Combine("${TEMP_TARGET_FINAL}", "updater.ini"))"
-	Remove-Item2 "$([IO.Path]::Combine("${TEMP_TARGET_FINAL}", "update-settings.ini"))"
-	Move-Item2 -From "${TEMP_TARGET_FINAL}" -To "$($InstallEnv.InstallTarget)"
-	Remove-Item2 "$($InstallEnv.TempTarget)"
+	Remove-Item2 -Path "${BIN_ARCH_TMP_FILE}"
+	$TEMP_CORE_TARGET = "$($InstallEnv.TempTarget)\core"
+	Remove-Item2 -Path "${TEMP_CORE_TARGET}\maintenanceservice.exe"
+	Remove-Item2 -Path "${TEMP_CORE_TARGET}\maintenanceservice_installer.exe"
+	Remove-Item2 -Path "${TEMP_CORE_TARGET}\updater.exe"
+	Remove-Item2 -Path "${TEMP_CORE_TARGET}\updater.ini"
+	Remove-Item2 -Path "${TEMP_CORE_TARGET}\update-settings.ini"
+	Move-Item2 -From "${TEMP_CORE_TARGET}" -To "$($InstallEnv.InstallTarget)"
+	Remove-Item2 -Path "$($InstallEnv.TempTarget)"
 }
 
 # Finalize install
 Copy-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
-$TARGET_EXE=[IO.Path]::Combine($($InstallEnv.ActiveTarget), ${PROGRAM_EXEC})
+$TARGET_EXE = "$($InstallEnv.ActiveTarget)\${PROGRAM_EXEC}"
 New-AppShortcut -ProgramName "${PROGRAM_NAME}" -TargetExe "${TARGET_EXE}" -WorkingDir "$($InstallEnv.ActiveTarget)" -Destination "$($InstallEnv.DesktopRoot)"
 New-AppShortcut -ProgramName "${PROGRAM_NAME}" -TargetExe "${TARGET_EXE}" -WorkingDir "$($InstallEnv.ActiveTarget)" -Destination "$($InstallEnv.StartMenuRoot)"
 Finalize-Install
