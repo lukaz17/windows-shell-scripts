@@ -26,6 +26,9 @@ param(
 	[string]$File
 )
 
+$ErrorActionPreference = "Stop"
+Set-StrictMode -Version Latest
+
 # ------------------------------------------------------------------------------
 # Get registry path in PowerShell format
 # ------------------------------------------------------------------------------
