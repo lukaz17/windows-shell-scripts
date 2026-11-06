@@ -262,7 +262,7 @@ function Initialize-InstallEnv {
 		$installRoot = "${localShare}\${ProgramId}"
 	}
 	if ("${env:CLIINST_USR_PROFILE}" -ne "") {
-		$userProfileData = "${env:CLIINST_USR_PROFILE}"
+		$userProfileData = "${env:CLIINST_USR_PROFILE}".TrimEnd('\', '/')
 	}
 	if ("${env:CLIINST_TEMP}" -ne "") {
 		$tempRoot = "${env:CLIINST_TEMP}".TrimEnd('\', '/')
@@ -502,8 +502,10 @@ function New-AppShortcut {
 }
 
 # ------------------------------------------------------------------------------
-# Finalize install.
+# Finalize install and put the user bin dir on PATH.
 # ------------------------------------------------------------------------------
 function Finalize-Install {
+	New-Directory2 -Path "${env:USERPROFILE}\.local\bin"
+	Update-CliinstPath -BinPath "${env:USERPROFILE}\.local\bin" -IsSystemWide $false
 	Write-Host "> Success."
 }
