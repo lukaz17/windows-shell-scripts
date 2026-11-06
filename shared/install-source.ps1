@@ -174,7 +174,7 @@ $Script:ProgramSourceTable = @{
 		GithubRepo       = "ollama"
 		SourceForgeProj  = ""
 		Amd64Uri         = { param($version) "https://github.com/ollama/ollama/releases/download/v${version}/ollama-windows-amd64.zip" }
-		Arm64Uri         = { param($version) "https://github.com/ollama/ollama/releases/download/v${version}/ollama-windows-amd64.zip" }
+		Arm64Uri         = { param($version) "https://github.com/ollama/ollama/releases/download/v${version}/ollama-windows-arm64.zip" }
 	}
 	"OpenCode" = @{
 		GithubOwner      = "anomalyco"
