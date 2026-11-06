@@ -147,6 +147,21 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://ftp.mozilla.org/pub/thunderbird/releases/${version}/win64/en-US/Thunderbird%20Setup%20${version}.exe" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"Nodejs" = @{
+		GithubOwner      = ""
+		GithubRepo       = ""
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://nodejs.org/dist/v${version}/node-v${version}-win-x64.zip" }
+		Arm64Uri         = {
+			param($version)
+			# Windows ARM64 builds start at 19.9.0
+			if (Test-VersionAtLeast -Version "${version}" -Anchor "19.9.0") {
+				"https://nodejs.org/dist/v${version}/node-v${version}-win-arm64.zip"
+			} else {
+				""
+			}
+		}
+	}
 	"Notepad++" = @{
 		GithubOwner      = "notepad-plus-plus"
 		GithubRepo       = "notepad-plus-plus"
