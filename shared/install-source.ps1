@@ -74,8 +74,8 @@ $Script:ProgramSourceTable = @{
 		GithubOwner      = "go-gitea"
 		GithubRepo       = "gitea"
 		SourceForgeProj  = ""
-		Amd64Uri         = { param($version) "https://github.com/go-gitea/gitea/releases/download/v${version}/gitea-${version}-windows-4.0-amd64.exe.xz" }
-		Arm64Uri         = { param($version) "https://github.com/go-gitea/gitea/releases/download/v${version}/gitea-${version}-windows-4.0-arm64.exe.xz" }
+		Amd64Uri         = { param($version) Get-GiteaUri -Version "${version}" -Arch "amd64" }
+		Arm64Uri         = { param($version) Get-GiteaUri -Version "${version}" -Arch "arm64" }
 	}
 	"Go" = @{
 		GithubOwner      = ""
@@ -337,6 +337,24 @@ function Get-FanControlUri {
 	}
 
 	return "https://github.com/Rem0o/FanControl.Releases/releases/download/V${Version}/${asset}"
+}
+
+# ------------------------------------------------------------------------------
+# Return Gitea binaries download URL.
+# ------------------------------------------------------------------------------
+function Get-GiteaUri {
+	param(
+		[Parameter(Mandatory)] [string] $Version,
+		[Parameter(Mandatory)] [string] $Arch
+	)
+
+	if (Test-VersionAtLeast -Version "${Version}" -Anchor "28") {
+		$asset = "gitea-${Version}-windows-${Arch}.exe.xz"
+	} else {
+		$asset = "gitea-${Version}-windows-4.0-${Arch}.exe.xz"
+	}
+
+	return "https://github.com/go-gitea/gitea/releases/download/v${Version}/${asset}"
 }
 
 # ------------------------------------------------------------------------------

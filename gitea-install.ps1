@@ -12,8 +12,8 @@
 #
 #  Example:
 #    gitea-install
-#    gitea-install 1.17.17
-#    gitea-install v1.17.17
+#    gitea-install 1.17.1
+#    gitea-install v1.17.1
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -32,12 +32,9 @@ $PROGRAM_EXEC = "gitea.exe"
 . "${PSScriptRoot}\shared\install-source.ps1"
 
 # Prepare environment
-$INSTALL_VERSION = ""
-if (${args}.Count -ge 1) {
-	$INSTALL_VERSION = ${args}[0].ToString()
-}
-$InstallSrc = Get-InstallSource "${PROGRAM_ID}"
-$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "${INSTALL_VERSION}"
+$InstallArgs = Get-InstallArgument -Arguments ${args}
+$InstallSrc = Get-InstallSource -ProgramId "${PROGRAM_ID}"
+$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "$($InstallArgs.Version)"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}"
 
 # Download and install binaries
@@ -46,13 +43,12 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 	$BIN_ARCH_URI_ARM64 = Get-Arm64Uri -ProgramId "${PROGRAM_ID}" -InstallVersion "${INSTALL_VERSION}"
 	$BIN_ARCH_TMP_FILE = "$($InstallEnv.TempTarget).xz"
 	Download-UriPerArch -Amd64Uri "${BIN_ARCH_URI_AMD64}" -Arm64Uri "${BIN_ARCH_URI_ARM64}" -OutputPath "${BIN_ARCH_TMP_FILE}"
-	New-Directory2 "$($InstallEnv.TempTarget)"
+	New-Directory2 -Path "$($InstallEnv.TempTarget)"
 	Extract-Archive -ArchivePath "${BIN_ARCH_TMP_FILE}" -DestinationPath "$($InstallEnv.TempTarget)" -ScriptRoot "${PSScriptRoot}"
-	Remove-Item2 "${BIN_ARCH_TMP_FILE}"
-	$TEMP_TARGET_FINAL = $([IO.Path]::Combine("$($InstallEnv.TempTarget)"))
-	Move-Item2 -From "$([IO.Path]::Combine("$($InstallEnv.TempTarget)", "${PROGRAM_ID}-v${INSTALL_VERSION}"))" -To "$([IO.Path]::Combine("$($InstallEnv.TempTarget)", "${PROGRAM_EXEC}"))"
-	Move-Item2 -From "${TEMP_TARGET_FINAL}" -To "$($InstallEnv.InstallTarget)"
-	Remove-Item2 "$($InstallEnv.TempTarget)"
+	Remove-Item2 -Path "${BIN_ARCH_TMP_FILE}"
+	Move-Item2 -From "$($InstallEnv.TempTarget)\${PROGRAM_ID}-v${INSTALL_VERSION}" -To "$($InstallEnv.TempTarget)\${PROGRAM_EXEC}"
+	Move-Item2 -From "$($InstallEnv.TempTarget)" -To "$($InstallEnv.InstallTarget)"
+	Remove-Item2 -Path "$($InstallEnv.TempTarget)"
 }
 
 # Finalize install
