@@ -48,7 +48,7 @@ Each version stays in its own `<Program>-v<version>` folder, and `active-release
 postgresql-install 17.7 --default
 ```
 
-`nodejs-install --default` also sets `npm_config_cache` to `.Nodejs\<major>\cache` and `npm_config_prefix` to `.Nodejs\<major>\bin` in the `CLIINST_USR_PROFILE` folder, and points the `.Nodejs\bin` junction on `CLIINST_USR_PATH` to that `bin` folder, so the npm cache and global packages follow the default major version.
+`nodejs-install --default` also sets `npm_config_cache` to `.Nodejs\cache` and `npm_config_prefix` to `.Nodejs` in the `CLIINST_USR_PROFILE` folder, and adds `.Nodejs` to `CLIINST_USR_PATH`, so the npm cache and global packages are shared by all major versions and stay in your account's folder, even for a systemwide install.
 
 Installers support AMD64 and ARM64, and stop with `Unsupported architecture` if a program has no build for your system.
 
@@ -57,6 +57,8 @@ Installers support AMD64 and ARM64, and stop with `Unsupported architecture` if 
 Run a script by name to install for your account only. This installs into `%USERPROFILE%\.local\share\<Program>`, and adds command-line programs to `CLIINST_USR_PATH`, which is on your `PATH`.
 
 To install systemwide, run the script from an elevated terminal, opened with Run as administrator. This installs into `%ProgramFiles%\<Program>`, and adds command-line programs to `CLIINST_PATH`, which is on the system `PATH`.
+
+Every installer also creates `%USERPROFILE%\.local\bin` and adds it to `CLIINST_USR_PATH`, for both install scopes.
 
 Open a new terminal to use a newly installed command. Desktop programs also get shortcuts on the Desktop and in the `Apps` folder of the Start Menu, for your account or for all users.
 
@@ -68,7 +70,7 @@ Some installers also set environment variables. The command decides where they g
 | `go-install` in an elevated terminal | Systemwide | System |
 | `sudo go-install` | Systemwide | System |
 
-Variables for data that belongs to an account, such as `GOPATH`, `RUSTUP_HOME`, and `CARGO_HOME`, always go to the account running the script.
+Variables for data that belongs to an account, such as `GOPATH`, `RUSTUP_HOME`, and `CARGO_HOME`, always go to the account running the script, and the installer creates their folders.
 
 To run the scripts by name from any administrator account, run `D:\Bin\CliInst\cliinst-install` once from an elevated terminal. This adds the repository to the system `PATH`. Scripts in this folder run as administrator, so keep it writable by trusted users only.
 
