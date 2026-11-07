@@ -169,6 +169,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v${version}/npp.${version}.portable.x64.7z" }
 		Arm64Uri         = { param($version) "https://github.com/notepad-plus-plus/notepad-plus-plus/releases/download/v${version}/npp.${version}.portable.arm64.zip" }
 	}
+	"NSSM" = @{
+		GithubOwner      = "tforce-io"
+		GithubRepo       = "nssm"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/tforce-io/nssm/releases/download/v${version}/nssm-${version}.zip" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"Ollama" = @{
 		GithubOwner      = "ollama"
 		GithubRepo       = "ollama"
