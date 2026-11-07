@@ -161,6 +161,24 @@ function Normalize-InstallVersion {
 }
 
 # ------------------------------------------------------------------------------
+# Get the major part of a version, such as 24 of v24.10.0 or 27.0.0-alpha.0.
+# ------------------------------------------------------------------------------
+function Get-VersionMajor {
+	param(
+		[Parameter(Mandatory)] [string] $Version
+	)
+
+	$core = (Normalize-InstallVersion -Version "${Version}").Split("-")[0]
+	$major = ${core}.Split(".")[0]
+	if (${major} -notmatch "^\d+$") {
+		Write-Output "Get-VersionMajor: Invalid version: ${Version}"
+		exit 1
+	}
+
+	return ${major}
+}
+
+# ------------------------------------------------------------------------------
 # Get string represent the version that is suitable for sorting using bare string.
 # ------------------------------------------------------------------------------
 function Get-VersionSortKey {
