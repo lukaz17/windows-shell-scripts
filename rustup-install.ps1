@@ -75,11 +75,8 @@ function Invoke-RustupExecutable {
 }
 
 # Prepare environment
-$INSTALL_VERSION = ""
-if (${args}.Count -ge 1) {
-	$INSTALL_VERSION = ${args}[0].ToString()
-}
-$INSTALL_VERSION = Get-InstallVersionFromRustLang -FallbackVersion "${INSTALL_VERSION}"
+$InstallArgs = Get-InstallArgument -Arguments ${args}
+$INSTALL_VERSION = Get-InstallVersionFromRustLang -FallbackVersion "$($InstallArgs.Version)"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}"
 
 # Download and install binaries
@@ -100,15 +97,16 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 }
 
 # Finalize install
-$RUSTUP_USER_TARGET = "$($InstallEnv.UserProfileData)\.${PROGRAM_ID}"
 $CARGO_USER_TARGET = "$($InstallEnv.UserProfileData)\.cargo"
+$RUSTUP_USER_TARGET = "$($InstallEnv.UserProfileData)\.${PROGRAM_ID}"
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
+New-Directory2 -Path "${CARGO_USER_TARGET}\bin"
+New-Directory2 -Path "${RUSTUP_USER_TARGET}"
+Set-EnvVariable -Name "CARGO_HOME" -Value "${CARGO_USER_TARGET}" -IsSystemWide $false
+Set-EnvVariable -Name "RUSTUP_HOME" -Value "${RUSTUP_USER_TARGET}" -IsSystemWide $false
 Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
 Update-CliinstPath -BinPath "${CARGO_USER_TARGET}\bin" -IsSystemWide $false
-Set-EnvVariable -Name "RUSTUP_HOME" -Value "${RUSTUP_USER_TARGET}" -IsSystemWide $false
-Set-EnvVariable -Name "CARGO_HOME" -Value "${CARGO_USER_TARGET}" -IsSystemWide $false
-$env:RUSTUP_HOME = "${RUSTUP_USER_TARGET}"
 $env:CARGO_HOME = "${CARGO_USER_TARGET}"
+$env:RUSTUP_HOME = "${RUSTUP_USER_TARGET}"
 Invoke-RustupExecutable -Path "$($InstallEnv.ActiveTarget)\${PROGRAM_EXEC}" -Arguments "set", "auto-self-update", "disable"
-Invoke-RustupExecutable -Path "$($InstallEnv.ActiveTarget)\${PROGRAM_EXEC}" -Arguments "set", "profile", "minimal"
 Finalize-Install
