@@ -267,6 +267,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/astral-sh/uv/releases/download/${version}/uv-x86_64-pc-windows-msvc.zip" }
 		Arm64Uri         = { param($version) "https://github.com/astral-sh/uv/releases/download/${version}/uv-aarch64-pc-windows-msvc.zip" }
 	}
+	"Visual Studio Code" = @{
+		GithubOwner      = "microsoft"
+		GithubRepo       = "vscode"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://update.code.visualstudio.com/${version}/win32-x64-archive/stable" }
+		Arm64Uri         = { param($version) "https://update.code.visualstudio.com/${version}/win32-arm64-archive/stable" }
+	}
 	"w64devkit" = @{
 		GithubOwner      = "skeeto"
 		GithubRepo       = "w64devkit"
