@@ -50,11 +50,8 @@ function Get-InstallVersionFromGoDev {
 }
 
 # Prepare environment
-$INSTALL_VERSION = ""
-if (${args}.Count -ge 1) {
-	$INSTALL_VERSION = ${args}[0].ToString()
-}
-$INSTALL_VERSION = Get-InstallVersionFromGoDev -FallbackVersion "${INSTALL_VERSION}"
+$InstallArgs = Get-InstallArgument -Arguments ${args}
+$INSTALL_VERSION = Get-InstallVersionFromGoDev -FallbackVersion "$($InstallArgs.Version)"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}"
 
 # Download and install binaries
@@ -73,8 +70,9 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 # Finalize install
 $GOPATH_TARGET = "$($InstallEnv.UserProfileData)\.${PROGRAM_ID}"
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
-Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)\bin" -IsSystemWide $($InstallEnv.IsAdmin)
-Update-CliinstPath -BinPath "${GOPATH_TARGET}\bin" -IsSystemWide $false
+New-Directory2 -Path "${GOPATH_TARGET}\bin"
 Set-EnvVariable -Name "GOROOT" -Value "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
 Set-EnvVariable -Name "GOPATH" -Value "${GOPATH_TARGET}" -IsSystemWide $false
+Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)\bin" -IsSystemWide $($InstallEnv.IsAdmin)
+Update-CliinstPath -BinPath "${GOPATH_TARGET}\bin" -IsSystemWide $false
 Finalize-Install
