@@ -30,6 +30,9 @@ Set-StrictMode -Version Latest
 
 # Variables that hold paths; the CLIINST_ settings are left out, installers recreate their folders
 $ENV_VARIABLES = @(
+	"BUN_INSTALL_BIN",
+	"BUN_INSTALL_CACHE_DIR",
+	"BUN_INSTALL_GLOBAL_DIR",
 	"CARGO_HOME",
 	"CLIINST_PATH",
 	"CLIINST_USR_PATH",

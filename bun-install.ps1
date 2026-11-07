@@ -50,6 +50,13 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 }
 
 # Finalize install
+$BUN_USER_TARGET = "$($InstallEnv.UserProfileData)\.${PROGRAM_ID}"
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
+New-Directory2 -Path "${BUN_USER_TARGET}"
+New-Directory2 -Path "${BUN_USER_TARGET}\cache"
+Set-EnvVariable -Name "BUN_INSTALL_BIN" -Value "${BUN_USER_TARGET}" -IsSystemWide $false
+Set-EnvVariable -Name "BUN_INSTALL_CACHE_DIR" -Value "${BUN_USER_TARGET}\cache" -IsSystemWide $false
+Set-EnvVariable -Name "BUN_INSTALL_GLOBAL_DIR" -Value "${BUN_USER_TARGET}" -IsSystemWide $false
 Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
+Update-CliinstPath -BinPath "${BUN_USER_TARGET}" -IsSystemWide $false
 Finalize-Install
