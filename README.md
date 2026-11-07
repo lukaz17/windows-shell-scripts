@@ -98,6 +98,19 @@ cliinst-install -UsrLocalShare "D:\Bin" -Tmp "E:\Workspace-CliInst"
 | `CLIINST_TEMP` | `-Tmp` | `%TEMP%` | Folder for downloads and extraction |
 | `CLIINST_USR_PROFILE` | None, set it yourself | `%USERPROFILE%\.local` | Folder for data that belongs to an account, such as `GOPATH` |
 
+### Repairing environment variables
+
+After you delete a program's folder, its paths stay in the environment variables. `cliinst-repair` lists the variables set by the installers, and the entries of `CLIINST_PATH` and `CLIINST_USR_PATH`, that point to a path no longer on disk. An `active-release` junction to a deleted version counts as missing. Pass `-Apply` to remove what is listed:
+
+```
+cliinst-repair
+cliinst-repair -Apply
+```
+
+Run `cliinst-repair -Apply` from an elevated terminal to repair system variables as well as those of your account. A path that cannot be checked, such as one on a drive that is not mounted, stays in place with a warning. The settings above are not repaired.
+
+If a variable is removed for a program you still use, run its installer again to restore it. Open a new terminal to see the changes.
+
 ## License
 
 Windows Shell Scripts is licensed under the MIT license. See LICENSE file for more details.
