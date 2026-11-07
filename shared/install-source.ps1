@@ -49,7 +49,7 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://download.cpuid.com/cpu-z/cpu-z_${version}-en.zip" }
 		Arm64Uri         = { param($version) "" }
 	}
-	"FanControl" = @{
+	"Fan Control" = @{
 		GithubOwner      = "Rem0o"
 		GithubRepo       = "FanControl.Releases"
 		SourceForgeProj  = ""

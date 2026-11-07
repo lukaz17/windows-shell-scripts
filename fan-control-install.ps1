@@ -24,8 +24,8 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 # Application info
-$PROGRAM_ID = "FanControl"
-$PROGRAM_NAME = "FanControl"
+$PROGRAM_ID = "Fan Control"
+$PROGRAM_NAME = "Fan Control"
 $PROGRAM_EXEC = "FanControl.exe"
 
 # Shared library
@@ -33,12 +33,9 @@ $PROGRAM_EXEC = "FanControl.exe"
 . "${PSScriptRoot}\shared\install-source.ps1"
 
 # Prepare environment
-$INSTALL_VERSION = ""
-if (${args}.Count -ge 1) {
-	$INSTALL_VERSION = ${args}[0].ToString()
-}
+$InstallArgs = Get-InstallArgument -Arguments ${args}
 $InstallSrc = Get-InstallSource -ProgramId "${PROGRAM_ID}"
-$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "${INSTALL_VERSION}" -TagPrefix "V"
+$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "$($InstallArgs.Version)" -TagPrefix "V"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}" -IsApplication
 
 # Download and install binaries
@@ -56,7 +53,6 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 
 # Finalize install
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
-$TARGET_EXE = "$($InstallEnv.ActiveTarget)\${PROGRAM_EXEC}"
-New-AppShortcut -ProgramName "${PROGRAM_NAME}" -TargetExe "${TARGET_EXE}" -WorkingDir "$($InstallEnv.ActiveTarget)" -Destination "$($InstallEnv.DesktopRoot)"
-New-AppShortcut -ProgramName "${PROGRAM_NAME}" -TargetExe "${TARGET_EXE}" -WorkingDir "$($InstallEnv.ActiveTarget)" -Destination "$($InstallEnv.StartMenuRoot)"
+New-AppShortcut -ProgramName "${PROGRAM_NAME}" -TargetExe "$($InstallEnv.ActiveTarget)\${PROGRAM_EXEC}" -WorkingDir "$($InstallEnv.ActiveTarget)" -Destination "$($InstallEnv.DesktopRoot)"
+New-AppShortcut -ProgramName "${PROGRAM_NAME}" -TargetExe "$($InstallEnv.ActiveTarget)\${PROGRAM_EXEC}" -WorkingDir "$($InstallEnv.ActiveTarget)" -Destination "$($InstallEnv.StartMenuRoot)"
 Finalize-Install
