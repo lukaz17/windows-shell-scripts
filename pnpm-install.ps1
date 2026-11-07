@@ -12,8 +12,8 @@
 #
 #  Example:
 #    pnpm-install
-#    pnpm-install 10.25.0
-#    pnpm-install v10.25.0
+#    pnpm-install 10.34.0
+#    pnpm-install v10.34.0
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -32,12 +32,9 @@ $PROGRAM_EXEC = "pnpm.exe"
 . "${PSScriptRoot}\shared\install-source.ps1"
 
 # Prepare environment
-$INSTALL_VERSION = ""
-if (${args}.Count -ge 1) {
-	$INSTALL_VERSION = ${args}[0].ToString()
-}
+$InstallArgs = Get-InstallArgument -Arguments ${args}
 $InstallSrc = Get-InstallSource -ProgramId "${PROGRAM_ID}"
-$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "${INSTALL_VERSION}"
+$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "$($InstallArgs.Version)"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}"
 
 # Download and install binaries
@@ -61,10 +58,20 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 }
 
 # Finalize install
-Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
-Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
+$PNPM_USER_TARGET = "$($InstallEnv.UserProfileData)\.${PROGRAM_ID}"
 if (Test-VersionAtLeast -Version "${INSTALL_VERSION}" -Anchor "11") {
-	Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)\bin" -IsSystemWide $($InstallEnv.IsAdmin)
+	$PNPM_CACHE_KEY = "pnpm_config_cache_dir"
+	$PNPM_BIN_TARGET = "${PNPM_USER_TARGET}\bin"
+} else {
+	$PNPM_CACHE_KEY = "npm_config_cache_dir"
+	$PNPM_BIN_TARGET = "${PNPM_USER_TARGET}"
 }
-Set-EnvVariable -Name "PNPM_HOME" -Value "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
+Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
+New-Directory2 -Path "${PNPM_USER_TARGET}"
+New-Directory2 -Path "${PNPM_USER_TARGET}\cache"
+New-Directory2 -Path "${PNPM_BIN_TARGET}"
+Set-EnvVariable -Name "PNPM_HOME" -Value "${PNPM_USER_TARGET}" -IsSystemWide $false
+Set-EnvVariable -Name "${PNPM_CACHE_KEY}" -Value "${PNPM_USER_TARGET}\cache" -IsSystemWide $false
+Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
+Update-CliinstPath -BinPath "${PNPM_BIN_TARGET}" -IsSystemWide $false
 Finalize-Install
