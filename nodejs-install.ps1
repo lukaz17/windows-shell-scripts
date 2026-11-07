@@ -10,14 +10,16 @@
 #  Usage:
 #    nodejs-install [<version>] [--default]
 #
-#    --default makes this major version the one on PATH and selects its npm cache and prefix, later updates of that major version follow.
+#    --default makes this major version the active-release.
 #
 #  Example:
 #    nodejs-install
 #    nodejs-install 24
-#    nodejs-install 24.10
-#    nodejs-install 24.10.0
-#    nodejs-install v24.10.0
+#    nodejs-install 24.22
+#    nodejs-install 24.22.2
+#    nodejs-install v24
+#    nodejs-install v24.22
+#    nodejs-install v24.22.2
 #    nodejs-install 24 --default
 #
 #  MIT License.
@@ -69,7 +71,7 @@ function Get-InstallVersionFromNodeJs {
 # Prepare environment
 $InstallArgs = Get-InstallArgument -Arguments ${args}
 $INSTALL_VERSION = Get-InstallVersionFromNodeJs -Version "$($InstallArgs.Version)"
-$INSTALL_MAJOR = ${INSTALL_VERSION}.Split('.')[0]
+$INSTALL_MAJOR = Get-VersionMajor -Version "${INSTALL_VERSION}"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}" -ActiveTag "v${INSTALL_MAJOR}"
 
 # Download and install binaries
@@ -87,17 +89,16 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 
 # Finalize install
 $NODEJS_USER_TARGET = "$($InstallEnv.UserProfileData)\.${PROGRAM_ID}"
-$NODEJS_USER_BIN = "${NODEJS_USER_TARGET}\bin"
-$NPM_CACHE_TARGET = "${NODEJS_USER_TARGET}\${INSTALL_MAJOR}\cache"
-$NPM_PREFIX_TARGET = "${NODEJS_USER_TARGET}\${INSTALL_MAJOR}\packages"
+$NPM_CACHE_TARGET = "${NODEJS_USER_TARGET}\cache"
+$NPM_PREFIX_TARGET = "${NODEJS_USER_TARGET}"
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
 if ($($InstallArgs.IsDefault)) {
-	Link-Item2 -From "$($InstallEnv.ActiveTarget)" -To "$($InstallEnv.DefaultTarget)" -Overwrite
-	Update-CliinstPath -BinPath "$($InstallEnv.DefaultTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
+	New-Directory2 -Path "${NPM_CACHE_TARGET}"
 	New-Directory2 -Path "${NPM_PREFIX_TARGET}"
-	Link-Item2 -From "${NPM_PREFIX_TARGET}" -To "${NODEJS_USER_BIN}" -Overwrite
-	Update-CliinstPath -BinPath "${NODEJS_USER_BIN}" -IsSystemWide $false
+	Link-Item2 -From "$($InstallEnv.ActiveTarget)" -To "$($InstallEnv.DefaultTarget)" -Overwrite
 	Set-EnvVariable -Name "npm_config_cache" -Value "${NPM_CACHE_TARGET}" -IsSystemWide $false
 	Set-EnvVariable -Name "npm_config_prefix" -Value "${NPM_PREFIX_TARGET}" -IsSystemWide $false
+	Update-CliinstPath -BinPath "$($InstallEnv.DefaultTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
+	Update-CliinstPath -BinPath "${NPM_PREFIX_TARGET}" -IsSystemWide $false
 }
 Finalize-Install
