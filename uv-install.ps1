@@ -31,12 +31,9 @@ $PROGRAM_ID = "uv"
 . "${PSScriptRoot}\shared\install-source.ps1"
 
 # Prepare environment
-$INSTALL_VERSION = ""
-if (${args}.Count -ge 1) {
-	$INSTALL_VERSION = ${args}[0].ToString()
-}
+$InstallArgs = Get-InstallArgument -Arguments ${args}
 $InstallSrc = Get-InstallSource -ProgramId "${PROGRAM_ID}"
-$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "${INSTALL_VERSION}"
+$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "$($InstallArgs.Version)"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}"
 
 # Download and install binaries
@@ -55,9 +52,10 @@ if (!(Test-Path "$($InstallEnv.InstallTarget)" -PathType Container)) {
 # Finalize install
 $UV_USER_TARGET = "$($InstallEnv.UserProfileData)\.${PROGRAM_ID}"
 Link-Item2 -From "$($InstallEnv.InstallTarget)" -To "$($InstallEnv.ActiveTarget)" -Overwrite
-Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
-Update-CliinstPath -BinPath "${env:USERPROFILE}\.local\bin" -IsSystemWide $false
+New-Directory2 -Path "${UV_USER_TARGET}\Python"
+New-Directory2 -Path "${UV_USER_TARGET}\Tool"
 Set-EnvVariable -Name "UV_INSTALL_DIR" -Value "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
 Set-EnvVariable -Name "UV_PYTHON_INSTALL_DIR" -Value "${UV_USER_TARGET}\Python" -IsSystemWide $false
 Set-EnvVariable -Name "UV_TOOL_DIR" -Value "${UV_USER_TARGET}\Tool" -IsSystemWide $false
+Update-CliinstPath -BinPath "$($InstallEnv.ActiveTarget)" -IsSystemWide $($InstallEnv.IsAdmin)
 Finalize-Install
