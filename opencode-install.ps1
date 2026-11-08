@@ -13,7 +13,9 @@
 #  Example:
 #    opencode-install
 #    opencode-install 1.17.17
+#    opencode-install 2.7.2
 #    opencode-install v1.17.17
+#    opencode-install v2.7.2
 #
 #  MIT License.
 #  Copyright (C) 2025 Nguyen Nhat Tung.
@@ -30,13 +32,29 @@ $PROGRAM_ID = "OpenCode"
 . "${PSScriptRoot}\shared\install-common.ps1"
 . "${PSScriptRoot}\shared\install-source.ps1"
 
-# Prepare environment
-$INSTALL_VERSION = ""
-if (${args}.Count -ge 1) {
-	$INSTALL_VERSION = ${args}[0].ToString()
+# ------------------------------------------------------------------------------
+# Get latest OpenCode version
+# ------------------------------------------------------------------------------
+function Get-InstallVersionFromOpenCode {
+	param(
+		[Parameter()] [string] $FallbackVersion = ""
+	)
+
+	if ("${FallbackVersion}" -eq "") {
+		# GitHub releases carry v1 only, v2 is published on opencode.ai
+		$version = (Invoke-WebRequest -UseBasicParsing "https://opencode.ai/update/api/latest/cli/opencode" | ConvertFrom-Json).version
+	} else {
+		$version = ${FallbackVersion}
+	}
+
+	$version = Normalize-InstallVersion -Version "${version}"
+	Write-Host "> Latest Version:  ${version}"
+	return ${version}
 }
-$InstallSrc = Get-InstallSource -ProgramId "${PROGRAM_ID}"
-$INSTALL_VERSION = Get-InstallVersionFromGithub -Owner "$($InstallSrc.GithubOwner)" -Repo "$($InstallSrc.GithubRepo)" -FallbackVersion "${INSTALL_VERSION}"
+
+# Prepare environment
+$InstallArgs = Get-InstallArgument -Arguments ${args}
+$INSTALL_VERSION = Get-InstallVersionFromOpenCode -FallbackVersion "$($InstallArgs.Version)"
 $InstallEnv = Initialize-InstallEnv -ProgramId "${PROGRAM_ID}" -Version "${INSTALL_VERSION}"
 
 # Download and install binaries

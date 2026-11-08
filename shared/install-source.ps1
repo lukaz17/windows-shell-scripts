@@ -187,8 +187,8 @@ $Script:ProgramSourceTable = @{
 		GithubOwner      = "anomalyco"
 		GithubRepo       = "opencode"
 		SourceForgeProj  = ""
-		Amd64Uri         = { param($version) "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-windows-x64.zip" }
-		Arm64Uri         = { param($version) "https://github.com/anomalyco/opencode/releases/download/v${version}/opencode-windows-arm64.zip" }
+		Amd64Uri         = { param($version) Get-OpenCodeUri -Version "${version}" -Arch "x64" }
+		Arm64Uri         = { param($version) Get-OpenCodeUri -Version "${version}" -Arch "arm64" }
 	}
 	"pnpm" = @{
 		GithubOwner      = "pnpm"
@@ -393,6 +393,24 @@ function Get-MariaDbUri {
 	}
 
 	return $($matchedFile.file_download_url)
+}
+
+# ------------------------------------------------------------------------------
+# Return OpenCode binaries download URL.
+# ------------------------------------------------------------------------------
+function Get-OpenCodeUri {
+	param(
+		[Parameter(Mandatory)] [string] $Version,
+		[Parameter(Mandatory)] [string] $Arch
+	)
+
+	if (Test-VersionAtLeast -Version "${Version}" -Anchor "2") {
+		$baseUri = "https://opencode.ai/files/bin/${Version}"
+	} else {
+		$baseUri = "https://github.com/anomalyco/opencode/releases/download/v${Version}"
+	}
+
+	return "${baseUri}/opencode-windows-${Arch}.zip"
 }
 
 # ------------------------------------------------------------------------------
