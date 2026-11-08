@@ -190,6 +190,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) Get-OpenCodeUri -Version "${version}" -Arch "x64" }
 		Arm64Uri         = { param($version) Get-OpenCodeUri -Version "${version}" -Arch "arm64" }
 	}
+	"PHP" = @{
+		GithubOwner      = ""
+		GithubRepo       = ""
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) Get-PhpUri -Version "${version}" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"pnpm" = @{
 		GithubOwner      = "pnpm"
 		GithubRepo       = "pnpm"
@@ -439,6 +446,41 @@ function Get-OpenCodeUri {
 	}
 
 	return "${baseUri}/opencode-windows-${Arch}.zip"
+}
+
+# ------------------------------------------------------------------------------
+# Return PHP binaries download URL.
+# ------------------------------------------------------------------------------
+function Get-PhpUri {
+	param(
+		[Parameter(Mandatory)] [string] $Version
+	)
+
+	$uri = (Get-PhpArchiveUri)[${Version}]
+	if ($null -eq ${uri}) {
+		Write-Output "Get-PhpUri: No matching file found for version ${Version}"
+		exit 1
+	}
+
+	return ${uri}
+}
+
+# ------------------------------------------------------------------------------
+# Return the download URL of every PHP build in the archive, keyed by version.
+# ------------------------------------------------------------------------------
+function Get-PhpArchiveUri {
+	# The archive holds every build, the current one included; releases/ drops a build once superseded
+	$archiveUri = "https://windows.php.net/downloads/releases/archives"
+	$listing = (Invoke-WebRequest -UseBasicParsing "${archiveUri}/").Content
+
+	# NTS build: thread safety serves only Apache mod_php, CLI and FastCGI run one request per process
+	# The compiler in the file name changes between series, so the name is read, not built from the version
+	$uris = @{}
+	foreach ($fileMatch in [regex]::Matches(${listing}, "php-(\d+\.\d+\.\d+(?:-\d+)?)-nts-Win32-[A-Za-z0-9]+-x64\.zip")) {
+		$uris[$fileMatch.Groups[1].Value] = "${archiveUri}/$($fileMatch.Value)"
+	}
+
+	return ${uris}
 }
 
 # ------------------------------------------------------------------------------
