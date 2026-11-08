@@ -179,6 +179,24 @@ function Get-VersionMajor {
 }
 
 # ------------------------------------------------------------------------------
+# Get the major and minor parts of a version, such as 8.4 of v8.4.27-1 or 24.10 of 24.10.0.
+# ------------------------------------------------------------------------------
+function Get-VersionMinor {
+	param(
+		[Parameter(Mandatory)] [string] $Version
+	)
+
+	$core = (Normalize-InstallVersion -Version "${Version}").Split("-")[0]
+	$minorMatch = [regex]::Match(${core}, "^(\d+\.\d+)(\.|$)")
+	if (!${minorMatch}.Success) {
+		Write-Output "Get-VersionMinor: Invalid version: ${Version}"
+		exit 1
+	}
+
+	return $($minorMatch.Groups[1].Value)
+}
+
+# ------------------------------------------------------------------------------
 # Get string represent the version that is suitable for sorting using bare string.
 # ------------------------------------------------------------------------------
 function Get-VersionSortKey {
