@@ -321,6 +321,34 @@ $Script:ProgramUriTable = @{
 			Amd64Uri = "https://sourceforge.net/projects/unikey/files/unikey-win/4.6%20RC1/unikey46RC1-230912-win64.zip/download"
 			Arm64Uri = ""
 		}
+		"4.3-rc5" = @{
+			Amd64Uri = "https://sourceforge.net/projects/unikey/files/unikey-win/4.3%20RC5/unikey43RC5-200929-win64.zip/download"
+			Arm64Uri = ""
+		}
+		"4.3-rc4" = @{
+			Amd64Uri = "https://sourceforge.net/projects/unikey/files/unikey-win/4.3%20RC4/unikey43RC4-180714-win64.zip/download"
+			Arm64Uri = ""
+		}
+		"4.3-rc3" = @{
+			Amd64Uri = "https://sourceforge.net/projects/unikey/files/unikey-win/4.3%20RC3/unikey43RC3-180702-win64.zip/download"
+			Arm64Uri = ""
+		}
+		"4.3-rc1" = @{
+			Amd64Uri = "https://sourceforge.net/projects/unikey/files/unikey-win/4.3%20RC1/unikey43RC1-180623-win64.zip/download"
+			Arm64Uri = ""
+		}
+		"4.2-rc4" = @{
+			Amd64Uri = "https://sourceforge.net/projects/unikey/files/unikey-win/4.2%20RC4/unikey42RC4-140823-win64.zip/download"
+			Arm64Uri = ""
+		}
+		"4.2-rc3" = @{
+			Amd64Uri = "https://sourceforge.net/projects/unikey/files/unikey-win/4.2%20RC3/unikey42RC3-140427-win64.zip/download"
+			Arm64Uri = ""
+		}
+		"4.2-rc1" = @{
+			Amd64Uri = "https://sourceforge.net/projects/unikey/files/unikey-win/4.2%20RC1/unikey42RC1-131228-win64.zip/download"
+			Arm64Uri = ""
+		}
 	}
 }
 
