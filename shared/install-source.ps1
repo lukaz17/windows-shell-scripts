@@ -473,11 +473,13 @@ function Get-PhpArchiveUri {
 	$archiveUri = "https://windows.php.net/downloads/releases/archives"
 	$listing = (Invoke-WebRequest -UseBasicParsing "${archiveUri}/").Content
 
-	# NTS build: thread safety serves only Apache mod_php, CLI and FastCGI run one request per process
+	# NTS build keyed by version: thread safety serves only Apache mod_php, CLI and FastCGI run one request per process
+	# TS build keyed by version and -ts, such as 8.4.27-1-ts, for Apache mod_php
 	# The compiler in the file name changes between series, so the name is read, not built from the version
 	$uris = @{}
-	foreach ($fileMatch in [regex]::Matches(${listing}, "php-(\d+\.\d+\.\d+(?:-\d+)?)-nts-Win32-[A-Za-z0-9]+-x64\.zip")) {
-		$uris[$fileMatch.Groups[1].Value] = "${archiveUri}/$($fileMatch.Value)"
+	foreach ($fileMatch in [regex]::Matches(${listing}, "php-(\d+\.\d+\.\d+(?:-\d+)?)-(nts-)?Win32-[A-Za-z0-9]+-x64\.zip")) {
+		$threadSafeSuffix = if ($fileMatch.Groups[2].Success) { "" } else { "-ts" }
+		$uris["$($fileMatch.Groups[1].Value)${threadSafeSuffix}"] = "${archiveUri}/$($fileMatch.Value)"
 	}
 
 	return ${uris}
