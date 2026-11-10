@@ -260,6 +260,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/ShareX/ShareX/releases/download/v${version}/ShareX-${version}-portable-x64.zip" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"Syncthing" = @{
+		GithubOwner      = "syncthing"
+		GithubRepo       = "syncthing"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/syncthing/syncthing/releases/download/v${version}/syncthing-windows-amd64-v${version}.zip" }
+		Arm64Uri         = { param($version) "https://github.com/syncthing/syncthing/releases/download/v${version}/syncthing-windows-arm64-v${version}.zip" }
+	}
 	"Tabby" = @{
 		GithubOwner      = "Eugeny"
 		GithubRepo       = "tabby"
