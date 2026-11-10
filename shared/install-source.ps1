@@ -147,6 +147,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://ftp.mozilla.org/pub/thunderbird/releases/${version}/win64/en-US/Thunderbird%20Setup%20${version}.exe" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"NGINX" = @{
+		GithubOwner      = "nginx"
+		GithubRepo       = "nginx"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://nginx.org/download/nginx-${version}.zip" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"Nodejs" = @{
 		GithubOwner      = ""
 		GithubRepo       = ""
