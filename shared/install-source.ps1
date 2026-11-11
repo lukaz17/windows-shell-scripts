@@ -133,6 +133,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/Kilo-Org/kilocode/releases/download/v${version}/kilo-windows-x64.zip" }
 		Arm64Uri         = { param($version) "https://github.com/Kilo-Org/kilocode/releases/download/v${version}/kilo-windows-arm64.zip" }
 	}
+	"LibreWolf" = @{
+		GithubOwner      = ""
+		GithubRepo       = ""
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) Get-LibreWolfUri -Version "${version}" -Arch "x86_64" }
+		Arm64Uri         = { param($version) Get-LibreWolfUri -Version "${version}" -Arch "arm64" }
+	}
 	"MariaDB" = @{
 		GithubOwner      = ""
 		GithubRepo       = ""
@@ -452,6 +459,25 @@ function Get-GiteaUri {
 	}
 
 	return "https://github.com/go-gitea/gitea/releases/download/v${Version}/${asset}"
+}
+
+# ------------------------------------------------------------------------------
+# Return LibreWolf binaries download URL.
+# ------------------------------------------------------------------------------
+function Get-LibreWolfUri {
+	param(
+		[Parameter(Mandatory)] [string] $Version,
+		[Parameter(Mandatory)] [string] $Arch
+	)
+
+	# Releases moved from GitLab to dl.librewolf.net; 147.0-1 to 147.0.3-2 are on neither, so they return 404
+	if (Test-VersionAtLeast -Version "${Version}" -Anchor "147.0.4-1") {
+		$baseUri = "https://dl.librewolf.net/librewolf/${Version}"
+	} else {
+		$baseUri = "https://gitlab.com/api/v4/projects/librewolf-community%2Fbrowser%2Fbsys6/packages/generic/librewolf/${Version}"
+	}
+
+	return "${baseUri}/librewolf-${Version}-windows-${Arch}-package.zip"
 }
 
 # ------------------------------------------------------------------------------
