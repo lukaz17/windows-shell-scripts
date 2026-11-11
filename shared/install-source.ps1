@@ -309,6 +309,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/skeeto/w64devkit/releases/download/v${version}/w64devkit-x64-${version}.7z.exe" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"Waterfox" = @{
+		GithubOwner      = "BrowserWorks"
+		GithubRepo       = "Waterfox"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) Get-WaterfoxUri -Version "${version}" -Arch "x86_64" }
+		Arm64Uri         = { param($version) Get-WaterfoxUri -Version "${version}" -Arch "aarch64" }
+	}
 	"WezTerm" = @{
 		GithubOwner      = "wezterm"
 		GithubRepo       = "wezterm"
@@ -497,6 +504,25 @@ function Get-PhpArchiveUri {
 	}
 
 	return ${uris}
+}
+
+# ------------------------------------------------------------------------------
+# Return Waterfox binaries download URL.
+# ------------------------------------------------------------------------------
+function Get-WaterfoxUri {
+	param(
+		[Parameter(Mandatory)] [string] $Version,
+		[Parameter(Mandatory)] [string] $Arch
+	)
+
+	# Releases before 6.5.0 are tagged with a G, such as G6.0.20
+	if (Test-VersionAtLeast -Version "${Version}" -Anchor "6.5.0") {
+		$tag = "${Version}"
+	} else {
+		$tag = "G${Version}"
+	}
+
+	return "https://cdn.waterfox.com/waterfox/releases/${tag}/WINNT_${Arch}/Waterfox%20Setup%20${tag}.exe"
 }
 
 # ------------------------------------------------------------------------------
