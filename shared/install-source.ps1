@@ -63,6 +63,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/GyanD/codexffmpeg/releases/download/${version}/ffmpeg-${version}-full_build.7z" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"Floorp" = @{
+		GithubOwner      = "Floorp-Projects"
+		GithubRepo       = "Floorp"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) Get-FloorpUri -Version "${version}" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"Foundry" = @{
 		GithubOwner      = "foundry-rs"
 		GithubRepo       = "foundry"
@@ -407,6 +414,26 @@ function Get-FanControlUri {
 	}
 
 	return "https://github.com/Rem0o/FanControl.Releases/releases/download/V${Version}/${asset}"
+}
+
+# ------------------------------------------------------------------------------
+# Return Floorp binaries download URL.
+# ------------------------------------------------------------------------------
+function Get-FloorpUri {
+	param(
+		[Parameter(Mandatory)] [string] $Version
+	)
+
+	# Releases before 12 cannot be downloaded: their tags were deleted, so their assets return 404
+	if (Test-VersionAtLeast -Version "${Version}" -Anchor "12.3.0") {
+		$asset = "floorp-windows-x86_64.installer.exe"
+	} elseif (Test-VersionAtLeast -Version "${Version}" -Anchor "12.0.5") {
+		$asset = "floorp-win64.installer.exe"
+	} else {
+		$asset = "floorp-win64-installer.exe"
+	}
+
+	return "https://github.com/Floorp-Projects/Floorp/releases/download/v${Version}/${asset}"
 }
 
 # ------------------------------------------------------------------------------
