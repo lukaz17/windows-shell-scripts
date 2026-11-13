@@ -147,6 +147,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) Get-MariaDbUri -Version "${version}" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"MediaInfo" = @{
+		GithubOwner      = "MediaArea"
+		GithubRepo       = "MediaInfo"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://mediaarea.net/download/binary/mediainfo/${version}/MediaInfo_CLI_${version}_Windows_x64.zip" }
+		Arm64Uri         = { param($version) "https://mediaarea.net/download/binary/mediainfo/${version}/MediaInfo_CLI_${version}_Windows_ARM64.zip" }
+	}
 	"Mozilla Firefox" = @{
 		GithubOwner      = "mozilla-firefox"
 		GithubRepo       = "firefox"
