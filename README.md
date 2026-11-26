@@ -27,7 +27,7 @@ git clone https://github.com/lukaz17/windows-shell-scripts.git D:\Bin\CliInst
 D:\Bin\CliInst\cliinst-install
 ```
 
-Open a new terminal to run the scripts by name. To update them later, run `cliinst-update`.
+It asks for each of the [settings](#settings) in turn; press Enter at each prompt to keep the default. Open a new terminal to run the scripts by name. To update them later, run `cliinst-update`.
 
 ### Installing programs
 
@@ -94,17 +94,19 @@ In an elevated terminal, it runs the command in place. In a normal terminal, it 
 
 ### Settings
 
-`cliinst-install` stores these settings as environment variables, for your account or, from an elevated terminal, for the system. Omit a parameter to keep its setting, or pass `""` to remove it.
+`cliinst-install` stores these settings as environment variables, for your account or, from an elevated terminal, for the system. `CLIINST_USR_PROFILE` always goes to your account. Omit a parameter to keep its setting, or pass `""` to remove it.
 
 ```
-cliinst-install -UsrLocalShare "D:\Bin" -Tmp "E:\Workspace-CliInst"
+cliinst-install -UsrLocalShare "D:\Bin" -UsrProfile "D:\Profile" -Tmp "E:\Workspace-CliInst"
 ```
+
+Run `cliinst-install` without parameters to be asked for each setting in turn. Each prompt shows the current value: press Enter to keep it, type a path to set it, or type `-` to remove it.
 
 | Environment variable | Parameter | Default | Purpose |
 |----------------------|-----------|---------|---------|
 | `CLIINST_USR_LOCAL_SHARE` | `-UsrLocalShare` | Depends on the install scope | Folder that programs install into, for both install scopes |
+| `CLIINST_USR_PROFILE` | `-UsrProfile` | `%USERPROFILE%\.local` | Folder for data that belongs to an account, such as `GOPATH` |
 | `CLIINST_TEMP` | `-Tmp` | `%TEMP%` | Folder for downloads and extraction |
-| `CLIINST_USR_PROFILE` | None, set it yourself | `%USERPROFILE%\.local` | Folder for data that belongs to an account, such as `GOPATH` |
 
 ### Repairing environment variables
 
