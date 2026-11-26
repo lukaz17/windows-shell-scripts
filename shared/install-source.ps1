@@ -140,6 +140,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) Get-LibreWolfUri -Version "${version}" -Arch "x86_64" }
 		Arm64Uri         = { param($version) Get-LibreWolfUri -Version "${version}" -Arch "arm64" }
 	}
+	"LocalAI" = @{
+		GithubOwner      = "mudler"
+		GithubRepo       = "LocalAI"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/mudler/LocalAI/releases/download/v${version}/local-ai-v${version}-windows-amd64.exe" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"MariaDB" = @{
 		GithubOwner      = ""
 		GithubRepo       = ""
