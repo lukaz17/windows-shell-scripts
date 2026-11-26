@@ -288,6 +288,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://github.com/ShareX/ShareX/releases/download/v${version}/ShareX-${version}-portable-x64.zip" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"Standard Notes" = @{
+		GithubOwner      = "standardnotes"
+		GithubRepo       = "app"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://github.com/standardnotes/app/releases/download/%40standardnotes/desktop%40${version}/standard-notes-${version}-win-x64.exe" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"Syncthing" = @{
 		GithubOwner      = "syncthing"
 		GithubRepo       = "syncthing"
