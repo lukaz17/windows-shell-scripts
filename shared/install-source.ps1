@@ -126,6 +126,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://repo.jellyfin.org/files/server/windows/stable/v${version}/amd64/jellyfin_${version}-amd64.zip" }
 		Arm64Uri         = { param($version) "https://repo.jellyfin.org/files/server/windows/stable/v${version}/arm64/jellyfin_${version}-arm64.zip" }
 	}
+	"KeePassXC" = @{
+		GithubOwner      = "keepassxreboot"
+		GithubRepo       = "keepassxc"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) Get-KeePassXcUri -Version "${version}" -Arch "x64" }
+		Arm64Uri         = { param($version) Get-KeePassXcUri -Version "${version}" -Arch "ARM64" }
+	}
 	"Kilo Code" = @{
 		GithubOwner      = "Kilo-Org"
 		GithubRepo       = "kilocode"
@@ -480,6 +487,29 @@ function Get-GiteaUri {
 	}
 
 	return "https://github.com/go-gitea/gitea/releases/download/v${Version}/${asset}"
+}
+
+# ------------------------------------------------------------------------------
+# Return KeePassXC binaries download URL.
+# ------------------------------------------------------------------------------
+function Get-KeePassXcUri {
+	param(
+		[Parameter(Mandatory)] [string] $Version,
+		[Parameter(Mandatory)] [string] $Arch
+	)
+
+	# Windows ARM64 builds start at 2.8.0; earlier releases name their AMD64 build Win64
+	if (Test-VersionAtLeast -Version "${Version}" -Anchor "2.8") {
+		$asset = "KeePassXC-${Version}-${Arch}.zip"
+	} elseif ("${Arch}" -ne "x64") {
+		return ""
+	} elseif (Test-VersionAtLeast -Version "${Version}" -Anchor "2.7") {
+		$asset = "KeePassXC-${Version}-Win64.zip"
+	} else {
+		$asset = "KeePassXC-${Version}-Win64-portable.zip"
+	}
+
+	return "https://github.com/keepassxreboot/keepassxc/releases/download/${Version}/${asset}"
 }
 
 # ------------------------------------------------------------------------------
