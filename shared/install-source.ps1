@@ -168,6 +168,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://mediaarea.net/download/binary/mediainfo/${version}/MediaInfo_CLI_${version}_Windows_x64.zip" }
 		Arm64Uri         = { param($version) "https://mediaarea.net/download/binary/mediainfo/${version}/MediaInfo_CLI_${version}_Windows_ARM64.zip" }
 	}
+	"MongoDB Compass" = @{
+		GithubOwner      = "mongodb-js"
+		GithubRepo       = "compass"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "https://downloads.mongodb.com/compass/mongodb-compass-${version}-win32-x64.zip" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"Mozilla Firefox" = @{
 		GithubOwner      = "mozilla-firefox"
 		GithubRepo       = "firefox"
