@@ -119,6 +119,13 @@ $Script:ProgramSourceTable = @{
 		Amd64Uri         = { param($version) "https://download.cpuid.com/hwmonitor/hwmonitor_${version}.zip" }
 		Arm64Uri         = { param($version) "" }
 	}
+	"innounp" = @{
+		GithubOwner      = "jrathlev"
+		GithubRepo       = "InnoUnpacker-Windows-GUI"
+		SourceForgeProj  = ""
+		Amd64Uri         = { param($version) "" }
+		Arm64Uri         = { param($version) "" }
+	}
 	"Jellyfin" = @{
 		GithubOwner      = "jellyfin"
 		GithubRepo       = "jellyfin"
@@ -389,6 +396,21 @@ $Script:ProgramSourceTable = @{
 }
 
 $Script:ProgramUriTable = @{
+	# Releases are tagged with the GUI version, the innounp version is in their release notes
+	"innounp" = @{
+		"2.71.4" = @{
+			Amd64Uri = "https://github.com/jrathlev/InnoUnpacker-Windows-GUI/releases/download/ui_2_2_14/innounp-2.zip"
+			Arm64Uri = "https://github.com/jrathlev/InnoUnpacker-Windows-GUI/releases/download/ui_2_2_14/innounp-2.zip"
+		}
+		"2.67.11" = @{
+			Amd64Uri = "https://github.com/jrathlev/InnoUnpacker-Windows-GUI/releases/download/oi_2_2_11/innounp-2.zip"
+			Arm64Uri = "https://github.com/jrathlev/InnoUnpacker-Windows-GUI/releases/download/oi_2_2_11/innounp-2.zip"
+		}
+		"2.67.9" = @{
+			Amd64Uri = "https://github.com/jrathlev/InnoUnpacker-Windows-GUI/releases/download/ui_2_2_9/innounp-2.zip"
+			Arm64Uri = "https://github.com/jrathlev/InnoUnpacker-Windows-GUI/releases/download/ui_2_2_9/innounp-2.zip"
+		}
+	}
 	"Unikey" = @{
 		"4.6-rc2" = @{
 			Amd64Uri = "https://sourceforge.net/projects/unikey/files/unikey-win/4.6%20RC2/unikey46RC2-230919-win64.zip/download"
@@ -714,4 +736,20 @@ function Get-Arm64Uri {
 	}
 
 	return & $entry.Arm64Uri ${InstallVersion}
+}
+
+# ------------------------------------------------------------------------------
+# Return the versions with a mapped download URI for a Program ID.
+# ------------------------------------------------------------------------------
+function Get-MappedVersion {
+	param(
+		[Parameter(Mandatory)] [string] $ProgramId
+	)
+
+	$uriEntry = $Script:ProgramUriTable[${ProgramId}]
+	if ($null -eq ${uriEntry}) {
+		return @()
+	}
+
+	return @(${uriEntry}.Keys)
 }

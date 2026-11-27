@@ -40,6 +40,8 @@ go-install 1.27.1
 
 These installers cannot look up the latest version, so the version is required: `cpuz-install`, `ffmpeg-install`, `firefox-install`, `hwinfo-install`, `hwmonitor-install`, `mariadb-install`, `php-install`, `postgresql-install`, `thunderbird-install`, and `unikey-install`.
 
+`innounp-install` installs only the versions listed in `shared\install-source.ps1`, as innounp's releases are tagged with the version of its GUI. Pass a series, such as `innounp-install 2.67`, for its newest listed version.
+
 Each version stays in its own `<Program>-v<version>` folder, and `active-release` next to it is the version in use. Run an installer with another version to switch to it. A version already on disk is not downloaded again. `mariadb-install`, `nodejs-install`, and `postgresql-install` keep one `active-release-v<major>` per major version, and `php-install` keeps one `active-release-v<minor>`, such as `active-release-v8.4`, per minor version, plus `active-release-v<minor>-ts` for its Thread Safe build.
 
 `mariadb-install`, `nodejs-install`, `php-install`, and `postgresql-install` add nothing to `PATH` unless you pass `--default`, which makes that major version the default, or that minor version for `php-install`. `active-release` then points to its `active-release-v<major>` or `active-release-v<minor>`, so later updates of that version carry over, and `active-release\bin` goes on `PATH`, or `active-release` itself for `nodejs-install` and `php-install`. Pass `--default` with another version to switch:
